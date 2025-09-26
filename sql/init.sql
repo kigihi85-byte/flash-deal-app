@@ -1,13 +1,17 @@
--- 데이터베이스 및 사용자 생성
-CREATE DATABASE flashdeal;
-CREATE USER flashdeal WITH PASSWORD 'flashdeal123';
-GRANT ALL PRIVILEGES ON DATABASE flashdeal TO flashdeal;
-
--- 데이터베이스 연결
-\c flashdeal;
-
 -- UUID 확장 활성화
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- users 테이블
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    phone VARCHAR(20),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
 
 -- deals 테이블
 CREATE TABLE deals (
@@ -27,6 +31,7 @@ CREATE TABLE deals (
 CREATE TABLE bookings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     deal_id UUID NOT NULL REFERENCES deals(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
     user_name VARCHAR(100) NOT NULL,
     contact VARCHAR(50) NOT NULL,
     booked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -48,14 +53,16 @@ CREATE TABLE payments (
 CREATE TABLE events (
     seq BIGSERIAL PRIMARY KEY,
     event_type VARCHAR(50) NOT NULL,
-    payload JSONB,
+    payload TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 인덱스 생성
+CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_deals_time ON deals(start_time, end_time);
 CREATE INDEX idx_deals_remaining ON deals(remaining_rooms);
 CREATE INDEX idx_bookings_deal ON bookings(deal_id);
+CREATE INDEX idx_bookings_user ON bookings(user_id);
 CREATE INDEX idx_payments_booking ON payments(booking_id);
 
 -- 초기 데이터 삽입
@@ -66,6 +73,3 @@ INSERT INTO deals (hotel_name, original_price, discounted_price, discount_pct, s
 ('강릉 바다뷰 펜션', 80000, 48000, 40, NOW() - INTERVAL '15 minutes', NOW() + INTERVAL '11 hours 45 minutes', 8, 0.88),
 ('속초 설악산 리조트', 120000, 72000, 40, NOW() - INTERVAL '45 minutes', NOW() + INTERVAL '11 hours 15 minutes', 4, 0.90);
 
--- 권한 설정
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO flashdeal;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO flashdeal;

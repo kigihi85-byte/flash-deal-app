@@ -24,7 +24,8 @@ public class PaymentService {
     
     public Payment processPayment(PaymentRequest request) {
         // 예약 확인
-        Booking booking = bookingRepository.findById(request.getBookingId()).orElse(null);
+        UUID bookingId = UUID.fromString(request.getBookingId());
+        Booking booking = bookingRepository.findById(bookingId).orElse(null);
         if (booking == null) {
             throw new IllegalArgumentException("존재하지 않는 예약입니다.");
         }

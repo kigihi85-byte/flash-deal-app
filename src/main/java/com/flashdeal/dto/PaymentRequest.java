@@ -1,16 +1,16 @@
 package com.flashdeal.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 public class PaymentRequest {
     
-    @NotNull(message = "예약 ID는 필수입니다")
-    private UUID bookingId;
+    @NotBlank(message = "예약 ID는 필수입니다")
+    private String bookingId;
     
     @NotNull(message = "결제 금액은 필수입니다")
     private BigDecimal amount;
@@ -35,11 +35,11 @@ public class PaymentRequest {
     public PaymentRequest() {}
     
     // Getters and Setters
-    public UUID getBookingId() {
+    public String getBookingId() {
         return bookingId;
     }
     
-    public void setBookingId(UUID bookingId) {
+    public void setBookingId(String bookingId) {
         this.bookingId = bookingId;
     }
     

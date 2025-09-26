@@ -1,6 +1,6 @@
 package com.flashdeal.entity;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,6 +16,10 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deal_id", nullable = false)
     private Deal deal;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
     
     @Column(name = "user_name", nullable = false, length = 100)
     private String userName;
@@ -38,6 +42,14 @@ public class Booking {
     public Booking(Deal deal, String userName, String contact) {
         this();
         this.deal = deal;
+        this.userName = userName;
+        this.contact = contact;
+    }
+    
+    public Booking(Deal deal, User user, String userName, String contact) {
+        this();
+        this.deal = deal;
+        this.user = user;
         this.userName = userName;
         this.contact = contact;
     }
@@ -89,5 +101,13 @@ public class Booking {
     
     public void setStatus(String status) {
         this.status = status;
+    }
+    
+    public User getUser() {
+        return user;
+    }
+    
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -126,8 +126,10 @@ public class DealService {
     
     private String dealDtoToJson(DealDto dto) {
         return String.format("{\"id\":\"%s\",\"hotelName\":\"%s\",\"originalPrice\":%s,\"discountedPrice\":%s,\"discountPct\":%d,\"startTime\":\"%s\",\"endTime\":\"%s\",\"remainingRooms\":%d,\"trust\":%s,\"active\":%b,\"timeRemaining\":%d}",
-                dto.getId(), dto.getHotelName(), dto.getOriginalPrice(), dto.getDiscountedPrice(), 
+                dto.getId(), dto.getHotelName(), 
+                dto.getOriginalPrice() != null ? dto.getOriginalPrice().toString() : "0", 
+                dto.getDiscountedPrice() != null ? dto.getDiscountedPrice().toString() : "0", 
                 dto.getDiscountPct(), dto.getStartTime(), dto.getEndTime(), dto.getRemainingRooms(), 
-                dto.getTrust(), dto.isActive(), dto.getTimeRemaining());
+                dto.getTrust() != null ? dto.getTrust().toString() : "0", dto.isActive(), dto.getTimeRemaining());
     }
 }

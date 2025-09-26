@@ -183,10 +183,10 @@
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <div class="original-price">
-                                        <fmt:formatNumber value="${deal.originalPrice}" type="currency" currencySymbol="₩"/>
+                                        ₩<fmt:formatNumber value="${deal.originalPrice}" pattern="#,###"/>
                                     </div>
                                     <div class="discounted-price">
-                                        <fmt:formatNumber value="${deal.discountedPrice}" type="currency" currencySymbol="₩"/>
+                                        ₩<fmt:formatNumber value="${deal.discountedPrice}" pattern="#,###"/>
                                     </div>
                                 </div>
                                 <div class="text-end">
@@ -340,17 +340,17 @@
                         <i class="fas fa-hotel fa-3x"></i>
                         <div class="ms-3">
                             <div>${deal.hotelName}</div>
-                            <small>신뢰도: ${Math.round(deal.trust * 100)}%</small>
+                            <small>신뢰도: ${Math.floor(deal.trust * 100)}%</small>
                         </div>
                     </div>
                     <div class="price-section">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
                                 <div class="original-price">
-                                    ₩${deal.originalPrice.toLocaleString()}
+                                    ₩${Math.floor(deal.originalPrice).toLocaleString()}
                                 </div>
                                 <div class="discounted-price">
-                                    ₩${deal.discountedPrice.toLocaleString()}
+                                    ₩${Math.floor(deal.discountedPrice).toLocaleString()}
                                 </div>
                             </div>
                             <div class="text-end">

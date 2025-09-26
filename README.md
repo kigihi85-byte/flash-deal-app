@@ -19,11 +19,16 @@ Spring Boot + JSP로 구현된 실시간 숙박 특가 플래시딜 웹앱입니
 - ✅ **예약 처리**: 원자적 트랜잭션으로 remaining_rooms 감소, bookings 테이블 저장
 - ✅ **모의 결제**: Luhn 알고리즘 + 만료일 검증 → 성공 처리 (결제 토큰 + last4 저장)
 - ✅ **실시간 UI 업데이트**: WebSocket으로 `new_deal`, `update_deal` 브로드캐스트
+- ✅ **사용자 인증**: 회원가입, 로그인, 로그아웃, 세션 관리
+- ✅ **사용자 대시보드**: 내 예약 목록, 예약 상태 조회, 예약 취소
+- ✅ **결제 페이지**: 카드 정보 입력, 결제 처리, 결제 완료 확인
 
 ### 개발/테스트 기능
 - ✅ **시뮬레이터 API**: `POST /simulate/deal` - 임의의 딜 생성 → DB insert → WebSocket emit
 - ✅ **실시간 딜 추가**: 새딜 도착 시 top-toast + 카드 슬라이드-in 애니메이션
 - ✅ **동시 예약 방지**: 오버부킹 방지 로직
+- ✅ **Swagger API 문서**: 모든 API 엔드포인트 문서화 및 테스트 가능
+- ✅ **API 테스트**: Swagger UI에서 직접 API 호출 및 응답 확인
 
 ## 🏗️ 프로젝트 구조
 
@@ -36,29 +41,40 @@ Spring Boot + JSP로 구현된 실시간 숙박 특가 플래시딜 웹앱입니
 │   ├── controller/
 │   │   ├── DealController.java           # 딜 관련 컨트롤러
 │   │   ├── BookingController.java        # 예약 관련 컨트롤러
-│   │   └── PaymentController.java        # 결제 관련 컨트롤러
+│   │   ├── PaymentController.java        # 결제 관련 컨트롤러
+│   │   ├── AuthController.java           # 인증 관련 컨트롤러
+│   │   └── UserController.java           # 사용자 관련 컨트롤러
 │   ├── service/
 │   │   ├── DealService.java              # 딜 비즈니스 로직
 │   │   ├── BookingService.java           # 예약 비즈니스 로직
-│   │   └── PaymentService.java           # 결제 비즈니스 로직
+│   │   ├── PaymentService.java           # 결제 비즈니스 로직
+│   │   └── UserService.java              # 사용자 비즈니스 로직
 │   ├── entity/
 │   │   ├── Deal.java                     # 딜 엔티티
 │   │   ├── Booking.java                  # 예약 엔티티
 │   │   ├── Payment.java                  # 결제 엔티티
+│   │   ├── User.java                     # 사용자 엔티티
 │   │   └── Event.java                    # 이벤트 엔티티
 │   ├── repository/
 │   │   ├── DealRepository.java           # 딜 리포지토리
 │   │   ├── BookingRepository.java        # 예약 리포지토리
 │   │   ├── PaymentRepository.java        # 결제 리포지토리
+│   │   ├── UserRepository.java           # 사용자 리포지토리
 │   │   └── EventRepository.java          # 이벤트 리포지토리
 │   └── dto/
 │       ├── DealDto.java                  # 딜 DTO
 │       ├── BookingRequest.java           # 예약 요청 DTO
 │       ├── PaymentRequest.java           # 결제 요청 DTO
+│       ├── LoginRequest.java             # 로그인 요청 DTO
+│       ├── RegisterRequest.java          # 회원가입 요청 DTO
 │       └── SimulateDealRequest.java      # 딜 생성 요청 DTO
 ├── src/main/webapp/WEB-INF/views/
 │   ├── index.jsp                         # 메인 페이지
 │   ├── dealDetail.jsp                    # 딜 상세 페이지
+│   ├── login.jsp                         # 로그인 페이지
+│   ├── register.jsp                      # 회원가입 페이지
+│   ├── dashboard.jsp                     # 사용자 대시보드
+│   ├── payment.jsp                       # 결제 페이지
 │   └── error.jsp                         # 에러 페이지
 ├── sql/
 │   └── init.sql                          # 데이터베이스 초기화 스크립트
@@ -81,9 +97,20 @@ Spring Boot + JSP로 구현된 실시간 숙박 특가 플래시딜 웹앱입니
 - `trust` (DECIMAL): 신뢰도
 - `created_at` (TIMESTAMP): 생성 시간
 
+### users 테이블
+- `id` (UUID): 사용자 고유 ID
+- `email` (VARCHAR): 이메일 (UNIQUE)
+- `password` (VARCHAR): 비밀번호 (해시)
+- `name` (VARCHAR): 이름
+- `phone` (VARCHAR): 전화번호
+- `created_at` (TIMESTAMP): 가입 시간
+- `updated_at` (TIMESTAMP): 수정 시간
+- `is_active` (BOOLEAN): 활성 상태
+
 ### bookings 테이블
 - `id` (UUID): 예약 고유 ID
 - `deal_id` (UUID): 딜 ID (FK)
+- `user_id` (UUID): 사용자 ID (FK, NULL 허용)
 - `user_name` (VARCHAR): 예약자명
 - `contact` (VARCHAR): 연락처
 - `booked_at` (TIMESTAMP): 예약 시간
@@ -152,12 +179,25 @@ java -jar target/*.jar
 ### 웹 페이지
 - `GET /` - 메인 페이지 (딜 리스트)
 - `GET /deal/{id}` - 딜 상세 페이지
+- `GET /login` - 로그인 페이지
+- `GET /register` - 회원가입 페이지
+- `GET /dashboard` - 사용자 대시보드
+- `GET /payment` - 결제 페이지
 
 ### REST API
 - `GET /api/deals` - 현재 활성 딜 목록 (JSON)
 - `POST /simulate/deal` - 테스트용 딜 생성
 - `POST /book` - 예약 생성
 - `POST /pay` - 모의 결제 처리
+- `POST /api/login` - 로그인
+- `POST /api/register` - 회원가입
+- `POST /api/logout` - 로그아웃
+- `GET /api/user/me` - 현재 사용자 정보
+- `GET /api/user/bookings` - 사용자 예약 목록
+- `POST /api/user/bookings/{id}/cancel` - 예약 취소
+
+### Swagger API 문서
+- `GET /swagger-ui.html` - Swagger UI (API 문서 및 테스트)
 
 ### WebSocket
 - **Endpoint**: `/ws`
@@ -177,9 +217,19 @@ java -jar target/*.jar
 # 4. "지금 예약하기" 버튼 클릭 → 예약 폼
 # 5. 예약 정보 입력 → 결제 폼
 # 6. 결제 정보 입력 → 결제 완료
+# 7. 회원가입/로그인 → 대시보드에서 예약 내역 확인
 ```
 
-### 2. 시뮬레이터 API 테스트
+### 2. Swagger API 문서 및 테스트
+
+```bash
+# 1. 애플리케이션 실행 후 http://localhost:8080/swagger-ui.html 접속
+# 2. Swagger UI에서 모든 API 엔드포인트 확인
+# 3. 각 API를 직접 테스트해볼 수 있음
+# 4. 요청/응답 스키마 확인 가능
+```
+
+### 3. 시뮬레이터 API 테스트
 
 ```bash
 # 새 딜 생성 (JSON)
@@ -201,7 +251,33 @@ curl -X POST http://localhost:8080/simulate/deal \
   -d "hotelName=테스트 호텔&originalPrice=200000&discountPct=40"
 ```
 
-### 3. 실시간 업데이트 테스트
+### 4. 사용자 인증 API 테스트
+
+```bash
+# 회원가입
+curl -X POST http://localhost:8080/api/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "password123",
+    "name": "홍길동",
+    "phone": "010-1234-5678"
+  }'
+
+# 로그인
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "password123"
+  }'
+
+# 현재 사용자 정보 조회 (세션 필요)
+curl -X GET http://localhost:8080/api/user/me \
+  -H "Cookie: JSESSIONID=<session-id>"
+```
+
+### 5. 실시간 업데이트 테스트
 
 ```bash
 # 1. 브라우저에서 http://localhost:8080 접속
@@ -210,7 +286,7 @@ curl -X POST http://localhost:8080/simulate/deal \
 # 4. 예약 후 남은 객실 수가 실시간으로 업데이트되는지 확인
 ```
 
-### 4. 동시 예약 테스트
+### 6. 동시 예약 테스트
 
 ```bash
 # 동시에 여러 예약 요청 (오버부킹 방지 테스트)
@@ -227,6 +303,9 @@ wait
 - ✅ **결제 토큰**: 모의 결제 토큰과 last4만 저장
 - ✅ **CSRF 보호**: Spring Security CSRF 토큰 적용 (권장)
 - ✅ **입력 검증**: Bean Validation으로 입력 데이터 검증
+- ✅ **세션 관리**: HttpSession을 통한 사용자 인증 상태 관리
+- ✅ **비밀번호 보호**: 비밀번호 해싱 (실제 운영에서는 BCrypt 등 사용 권장)
+- ✅ **이메일 중복 방지**: 회원가입 시 이메일 중복 검사
 
 ## 📊 모니터링 및 로깅
 

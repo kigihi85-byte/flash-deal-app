@@ -1,8 +1,6 @@
 package com.flashdeal.entity;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import javax.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -17,8 +15,7 @@ public class Event {
     @Column(name = "event_type", nullable = false, length = 50)
     private String eventType;
     
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "payload")
+    @Column(name = "payload", columnDefinition = "TEXT")
     private String payload;
     
     @Column(name = "created_at")
