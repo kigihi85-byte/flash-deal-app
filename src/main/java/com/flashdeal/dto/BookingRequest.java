@@ -1,52 +1,36 @@
 package com.flashdeal.dto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.*;
 import java.util.UUID;
 
 public class BookingRequest {
     
-    @NotNull(message = "딜 ID는 필수입니다")
+    @NotNull(message = "Deal ID is required")
     private UUID dealId;
     
-    @NotBlank(message = "이름은 필수입니다")
-    private String userName;
+    @NotNull(message = "Number of rooms is required")
+    @Min(value = 1, message = "Number of rooms must be at least 1")
+    @Max(value = 10, message = "Number of rooms cannot exceed 10")
+    private Integer numberOfRooms = 1;
     
-    @NotBlank(message = "연락처는 필수입니다")
-    private String contact;
+    @Size(max = 500, message = "Notes must not exceed 500 characters")
+    private String notes;
     
     // Constructors
     public BookingRequest() {}
     
-    public BookingRequest(UUID dealId, String userName, String contact) {
+    public BookingRequest(UUID dealId, Integer numberOfRooms) {
         this.dealId = dealId;
-        this.userName = userName;
-        this.contact = contact;
+        this.numberOfRooms = numberOfRooms;
     }
     
     // Getters and Setters
-    public UUID getDealId() {
-        return dealId;
-    }
+    public UUID getDealId() { return dealId; }
+    public void setDealId(UUID dealId) { this.dealId = dealId; }
     
-    public void setDealId(UUID dealId) {
-        this.dealId = dealId;
-    }
+    public Integer getNumberOfRooms() { return numberOfRooms; }
+    public void setNumberOfRooms(Integer numberOfRooms) { this.numberOfRooms = numberOfRooms; }
     
-    public String getUserName() {
-        return userName;
-    }
-    
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-    
-    public String getContact() {
-        return contact;
-    }
-    
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 }

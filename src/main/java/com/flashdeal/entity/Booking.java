@@ -1,6 +1,11 @@
 package com.flashdeal.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -9,105 +14,105 @@ import java.util.UUID;
 public class Booking {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deal_id", nullable = false)
     private Deal deal;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @NotNull(message = "Booking time is required")
+    @Column(nullable = false)
+    private LocalDateTime bookingTime;
     
-    @Column(name = "user_name", nullable = false, length = 100)
-    private String userName;
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
     
-    @Column(name = "contact", nullable = false, length = 50)
-    private String contact;
+    @Min(value = 1, message = "Number of rooms must be at least 1")
+    @Column(nullable = false)
+    private Integer numberOfRooms = 1;
     
-    @Column(name = "booked_at")
-    private LocalDateTime bookedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BookingStatus status = BookingStatus.CONFIRMED;
     
-    @Column(name = "status", length = 20)
-    private String status;
+    @Size(max = 500, message = "Notes must not exceed 500 characters")
+    private String notes;
+    
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
     
     // Constructors
-    public Booking() {
-        this.bookedAt = LocalDateTime.now();
-        this.status = "CONFIRMED";
-    }
+    public Booking() {}
     
-    public Booking(Deal deal, String userName, String contact) {
-        this();
-        this.deal = deal;
-        this.userName = userName;
-        this.contact = contact;
-    }
-    
-    public Booking(Deal deal, User user, String userName, String contact) {
-        this();
-        this.deal = deal;
+    public Booking(User user, Deal deal, BigDecimal price, Integer numberOfRooms) {
         this.user = user;
-        this.userName = userName;
-        this.contact = contact;
+        this.deal = deal;
+        this.bookingTime = LocalDateTime.now();
+        this.price = price;
+        this.numberOfRooms = numberOfRooms;
     }
     
     // Getters and Setters
-    public UUID getId() {
-        return id;
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+    
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+    
+    public Deal getDeal() { return deal; }
+    public void setDeal(Deal deal) { this.deal = deal; }
+    
+    public LocalDateTime getBookingTime() { return bookingTime; }
+    public void setBookingTime(LocalDateTime bookingTime) { this.bookingTime = bookingTime; }
+    
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    
+    public Integer getNumberOfRooms() { return numberOfRooms; }
+    public void setNumberOfRooms(Integer numberOfRooms) { this.numberOfRooms = numberOfRooms; }
+    
+    public BookingStatus getStatus() { return status; }
+    public void setStatus(BookingStatus status) { this.status = status; }
+    
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    // Business methods
+    public boolean canBeCancelled() {
+        return status == BookingStatus.CONFIRMED && 
+               deal.getEndTime().isAfter(LocalDateTime.now());
     }
     
-    public void setId(UUID id) {
-        this.id = id;
+    public void cancel() {
+        if (canBeCancelled()) {
+            status = BookingStatus.CANCELLED;
+            deal.cancelBooking();
+        }
     }
     
-    public Deal getDeal() {
-        return deal;
+    public BigDecimal getTotalPrice() {
+        return price.multiply(BigDecimal.valueOf(numberOfRooms));
     }
     
-    public void setDeal(Deal deal) {
-        this.deal = deal;
-    }
-    
-    public String getUserName() {
-        return userName;
-    }
-    
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-    
-    public String getContact() {
-        return contact;
-    }
-    
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-    
-    public LocalDateTime getBookedAt() {
-        return bookedAt;
-    }
-    
-    public void setBookedAt(LocalDateTime bookedAt) {
-        this.bookedAt = bookedAt;
-    }
-    
-    public String getStatus() {
-        return status;
-    }
-    
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    
-    public User getUser() {
-        return user;
-    }
-    
-    public void setUser(User user) {
-        this.user = user;
+    public enum BookingStatus {
+        CONFIRMED, CANCELLED, COMPLETED
     }
 }

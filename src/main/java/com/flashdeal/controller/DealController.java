@@ -1,108 +1,135 @@
 package com.flashdeal.controller;
 
+import com.flashdeal.dto.CreateDealRequest;
 import com.flashdeal.dto.DealDto;
-import com.flashdeal.dto.SimulateDealRequest;
 import com.flashdeal.service.DealService;
-import io.swagger.annotations.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
-@Controller
-@Api(tags = "딜 관리 API")
+@RestController
+@RequestMapping("/deals")
+@CrossOrigin(origins = "*")
 public class DealController {
     
     @Autowired
     private DealService dealService;
     
-    @GetMapping("/")
-    public String index(Model model) {
-        List<DealDto> activeDeals = dealService.getActiveDeals();
-        model.addAttribute("deals", activeDeals);
-        return "index";
-    }
-    
-    @GetMapping("/api/deals")
-    @ResponseBody
-    @ApiOperation(value = "활성 딜 목록 조회", notes = "현재 활성화된 모든 딜 목록을 반환합니다.")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = "성공적으로 딜 목록을 조회했습니다.")
-    })
-    public ResponseEntity<List<DealDto>> getDeals() {
+    @GetMapping("/active")
+    public ResponseEntity<List<DealDto>> getActiveDeals() {
         List<DealDto> deals = dealService.getActiveDeals();
         return ResponseEntity.ok(deals);
     }
     
-    @GetMapping("/deal/{id}")
-    @ApiOperation(value = "딜 상세 조회", notes = "특정 딜의 상세 정보를 조회합니다.")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = "성공적으로 딜 정보를 조회했습니다."),
-        @ApiResponse(code = 404, message = "딜을 찾을 수 없습니다.")
-    })
-    public String getDealDetail(
-            @ApiParam(value = "딜 ID", required = true) @PathVariable String id, 
-            Model model) {
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<DealDto>> getUpcomingDeals() {
+        List<DealDto> deals = dealService.getUpcomingDeals();
+        return ResponseEntity.ok(deals);
+    }
+    
+    @GetMapping("/active/paginated")
+    public ResponseEntity<Page<DealDto>> getActiveDealsWithPagination(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DealDto> deals = dealService.getActiveDealsWithPagination(pageable);
+        return ResponseEntity.ok(deals);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<DealDto> getDealById(@PathVariable UUID id) {
+        return dealService.getDealById(id)
+                .map(deal -> ResponseEntity.ok(deal))
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/search")
+    public ResponseEntity<List<DealDto>> searchDeals(@RequestParam String q) {
+        List<DealDto> deals = dealService.searchDeals(q);
+        return ResponseEntity.ok(deals);
+    }
+    
+    @GetMapping("/price-range")
+    public ResponseEntity<List<DealDto>> getDealsByPriceRange(
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice) {
+        List<DealDto> deals = dealService.getDealsByPriceRange(minPrice, maxPrice);
+        return ResponseEntity.ok(deals);
+    }
+    
+    @GetMapping("/discount")
+    public ResponseEntity<List<DealDto>> getDealsByMinDiscount(@RequestParam Integer minDiscount) {
+        List<DealDto> deals = dealService.getDealsByMinDiscount(minDiscount);
+        return ResponseEntity.ok(deals);
+    }
+    
+    @GetMapping("/ending-soon")
+    public ResponseEntity<List<DealDto>> getDealsEndingSoon(@RequestParam(defaultValue = "24") int hours) {
+        List<DealDto> deals = dealService.getDealsEndingSoon(hours);
+        return ResponseEntity.ok(deals);
+    }
+    
+    @PostMapping
+    public ResponseEntity<DealDto> createDeal(@Valid @RequestBody CreateDealRequest request) {
         try {
-            DealDto deal = dealService.getDealById(java.util.UUID.fromString(id));
-            if (deal == null) {
-                return "error";
-            }
-            model.addAttribute("deal", deal);
-            return "dealDetail";
+            DealDto deal = dealService.createDeal(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(deal);
         } catch (IllegalArgumentException e) {
-            return "error";
+            return ResponseEntity.badRequest().build();
         }
     }
     
-    @PostMapping(value = "/simulate/deal", consumes = "application/json")
-    @ResponseBody
-    @ApiOperation(value = "테스트용 딜 생성 (JSON)", notes = "개발/테스트용으로 새로운 딜을 생성합니다.")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = "성공적으로 딜을 생성했습니다."),
-        @ApiResponse(code = 400, message = "입력 데이터가 올바르지 않습니다.")
-    })
-    public ResponseEntity<?> createDeal(
-            @ApiParam(value = "딜 생성 요청 데이터", required = true) 
-            @Valid @RequestBody SimulateDealRequest request, 
-            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body("입력 데이터가 올바르지 않습니다.");
-        }
-        
+    @PutMapping("/{id}")
+    public ResponseEntity<DealDto> updateDeal(@PathVariable UUID id, @Valid @RequestBody CreateDealRequest request) {
         try {
-            DealDto deal = dealService.createDeal(request);
+            DealDto deal = dealService.updateDeal(id, request);
             return ResponseEntity.ok(deal);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("딜 생성 중 오류가 발생했습니다: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
     
-    @PostMapping(value = "/simulate/deal", consumes = "application/x-www-form-urlencoded")
-    @ResponseBody
-    @ApiOperation(value = "테스트용 딜 생성 (Form)", notes = "개발/테스트용으로 새로운 딜을 생성합니다. (Form 데이터)")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = "성공적으로 딜을 생성했습니다."),
-        @ApiResponse(code = 400, message = "입력 데이터가 올바르지 않습니다.")
-    })
-    public ResponseEntity<?> createDealForm(
-            @ApiParam(value = "딜 생성 요청 데이터", required = true) 
-            @Valid @ModelAttribute SimulateDealRequest request, 
-            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body("입력 데이터가 올바르지 않습니다.");
-        }
-        
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDeal(@PathVariable UUID id) {
         try {
-            DealDto deal = dealService.createDeal(request);
-            return ResponseEntity.ok(deal);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("딜 생성 중 오류가 발생했습니다: " + e.getMessage());
+            dealService.deleteDeal(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
+    }
+    
+    @PostMapping("/{id}/book")
+    public ResponseEntity<Void> bookRoom(@PathVariable UUID id) {
+        try {
+            dealService.bookRoom(id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelBooking(@PathVariable UUID id) {
+        try {
+            dealService.cancelBooking(id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    @GetMapping("/stats/count")
+    public ResponseEntity<Long> getActiveDealsCount() {
+        long count = dealService.getActiveDealsCount();
+        return ResponseEntity.ok(count);
     }
 }

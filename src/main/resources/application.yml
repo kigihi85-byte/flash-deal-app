@@ -3,9 +3,9 @@ spring:
     name: flash-deal-app
   
   datasource:
-    url: jdbc:postgresql://postgres:5432/flashdeal_db
-    username: user
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/flashdeal}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -16,11 +16,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        use_sql_comments: true
   
-  mvc:
-    view:
-      prefix: /WEB-INF/views/
-      suffix: .jsp
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
 
 server:
   port: 8080
@@ -28,4 +30,4 @@ server:
 logging:
   level:
     com.flashdeal: DEBUG
-    org.springframework.web: INFO
+    org.springframework.security: DEBUG
