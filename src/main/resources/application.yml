@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: flash-deal-app
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/flashdeal
+    username: flashdeal
+    password: flashdeal123
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.flashdeal: DEBUG
+    org.springframework.web: INFO
