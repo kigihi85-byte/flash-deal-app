@@ -9,6 +9,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Payment from './pages/Payment';
 import Admin from './pages/Admin';
+import UserDetail from './pages/UserDetail';
+import BookingDetail from './pages/BookingDetail';
 import BookingSuccess from './pages/BookingSuccess';
 import MyPage from './pages/MyPage';
 import HotelRegistration from './pages/HotelRegistration';
@@ -47,6 +49,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/user/:userId" element={<UserDetail />} />
+              <Route path="/admin/booking/:bookingId" element={<BookingDetail />} />
             </Routes>
             </MainContent>
             <Toaster 

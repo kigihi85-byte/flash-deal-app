@@ -2,6 +2,25 @@
 
 React + Spring Boot로 구현된 현대적인 숙박 특가 플래시딜 웹앱입니다. 아고다와 유사한 UI/UX와 실시간 딜 업데이트를 제공합니다.
 
+## 🎯 최신 업데이트 (2025-09-29)
+
+### ✨ 새로 추가된 기능
+- **관리자 대시보드**: 현대적인 글래스모피즘 UI로 완전히 리디자인
+- **사용자 상세 페이지**: 관리자가 사용자 정보를 상세히 확인할 수 있는 페이지
+- **예약 상세 페이지**: 관리자가 예약 정보를 상세히 확인할 수 있는 페이지
+- **지역별 필터링**: 서울, 부산, 제주도, 도쿄, 방콕 등 도시별 딜 필터링
+- **리뷰 시스템**: 호텔 리뷰 작성, 평점, 통계 기능
+- **호텔 등록**: 관리자가 새로운 호텔 딜을 등록할 수 있는 기능
+- **검색 페이지**: 고급 검색 필터 (가격, 별점, 편의시설)
+- **결제 및 예약 성공 페이지**: 완전한 예약 플로우
+
+### 🎨 UI/UX 개선
+- **글래스모피즘 디자인**: 반투명 카드와 블러 효과
+- **그라데이션 배경**: 보라색 그라데이션으로 현대적인 느낌
+- **호버 애니메이션**: 카드와 버튼에 부드러운 호버 효과
+- **상태 배지**: 확인됨, 대기중, 취소됨 등 상태를 시각적으로 표시
+- **반응형 디자인**: 모바일과 데스크톱 모두 최적화
+
 ## 🚀 기술 스택
 
 - **Backend**: Java 17, Spring Boot 3.2.0, Spring MVC, Spring Data JPA
@@ -18,20 +37,27 @@ React + Spring Boot로 구현된 현대적인 숙박 특가 플래시딜 웹앱�
 - ✅ **아고다 스타일 헤더**: 네비게이션 메뉴, 검색창, 사용자 액션
 - ✅ **메인 페이지**: 아름다운 배경 이미지와 중앙 검색 위젯
 - ✅ **딜 카드**: 호텔 이미지, 할인 정보, 예약 버튼
-- ✅ **국가별 필터링**: 국가/도시별 딜 검색
+- ✅ **지역별 필터링**: 서울, 부산, 제주도, 도쿄, 방콕 등 도시별 딜 필터링
 - ✅ **날짜 선택기**: 체크인/체크아웃 날짜 선택
 - ✅ **상세 페이지**: 호텔 상세 정보와 예약 기능
+- ✅ **리뷰 시스템**: 호텔 리뷰 작성, 평점, 통계
+- ✅ **검색 페이지**: 고급 검색 필터 (가격, 별점, 편의시설)
 - ✅ **결제 페이지**: 카드 정보 입력, 예약 요약, 결제 처리
+- ✅ **예약 성공 페이지**: 예약 완료 확인 및 상세 정보
+- ✅ **마이페이지**: 사용자 정보, 예약 내역 관리
 - ✅ **사용자 인증**: 회원가입, 로그인, 로그아웃
 - ✅ **다국어 지원**: 한국어/영어 전환
 - ✅ **반응형 디자인**: 모바일과 데스크톱 최적화
 
 ### 👨‍💼 관리자 기능
-- ✅ **관리자 대시보드**: 통계, 최근 예약, 사용자 관리
-- ✅ **딜 관리**: 딜 생성, 수정, 삭제
-- ✅ **사용자 관리**: 사용자 목록, 권한 관리
+- ✅ **관리자 대시보드**: 현대적인 글래스모피즘 UI, 통계, 최근 예약, 사용자 관리
+- ✅ **사용자 상세 페이지**: 사용자 정보, 예약 내역, 활동 통계 확인
+- ✅ **예약 상세 페이지**: 예약 정보, 고객 정보, 결제 정보, 딜 정보 확인
+- ✅ **딜 관리**: 딜 생성, 수정, 삭제 (버튼 동작 구현)
+- ✅ **사용자 관리**: 사용자 목록, 권한 관리, 상세 정보 보기
 - ✅ **실시간 활동**: 시스템 활동 로그
 - ✅ **권한 체크**: 관리자만 접근 가능
+- ✅ **호텔 등록**: 새로운 호텔 딜 등록 기능
 
 ### 🔧 개발/테스트 기능
 - ✅ **Swagger API 문서**: 모든 API 엔드포인트 문서화
@@ -193,21 +219,27 @@ React + Spring Boot로 구현된 현대적인 숙박 특가 플래시딜 웹앱�
 
 ```bash
 # 프로젝트 클론
-git clone <repository-url>
+git clone https://github.com/kigihi85-byte/flash-deal-app.git
 cd flash-deal-app
 
 # Docker Compose로 실행
-docker-compose up --build
-
-# 백그라운드 실행
-docker-compose up --build -d
+docker-compose up -d
 
 # 로그 확인
 docker-compose logs -f
 
 # 중지
 docker-compose down
+
+# 완전 초기화 (볼륨 포함)
+docker-compose down -v
 ```
+
+### 접속 정보
+- **메인 페이지**: http://localhost:3000
+- **관리자 페이지**: http://localhost:3000/admin
+- **백엔드 API**: http://localhost:8080
+- **Swagger 문서**: http://localhost:8080/swagger-ui/index.html
 
 ### 2. 로컬 개발 환경
 
@@ -232,25 +264,33 @@ java -jar target/*.jar
 
 ## 🌐 API 엔드포인트
 
-### 웹 페이지
+### 웹 페이지 (React)
 - `GET /` - 메인 페이지 (딜 리스트)
-- `GET /deal/{id}` - 딜 상세 페이지
+- `GET /deal/:id` - 딜 상세 페이지
 - `GET /login` - 로그인 페이지
 - `GET /register` - 회원가입 페이지
-- `GET /dashboard` - 사용자 대시보드
+- `GET /mypage` - 마이페이지
 - `GET /payment` - 결제 페이지
+- `GET /booking-success` - 예약 성공 페이지
+- `GET /search` - 검색 페이지
+- `GET /hotel-registration` - 호텔 등록 페이지
+- `GET /admin` - 관리자 대시보드
+- `GET /admin/user/:userId` - 사용자 상세 페이지
+- `GET /admin/booking/:bookingId` - 예약 상세 페이지
 
-### REST API
-- `GET /api/deals` - 현재 활성 딜 목록 (JSON)
-- `POST /simulate/deal` - 테스트용 딜 생성
-- `POST /book` - 예약 생성
-- `POST /pay` - 모의 결제 처리
-- `POST /api/login` - 로그인
-- `POST /api/register` - 회원가입
-- `POST /api/logout` - 로그아웃
-- `GET /api/user/me` - 현재 사용자 정보
-- `GET /api/user/bookings` - 사용자 예약 목록
-- `POST /api/user/bookings/{id}/cancel` - 예약 취소
+### REST API (Spring Boot)
+- `GET /deals/active` - 현재 활성 딜 목록
+- `GET /deals/upcoming` - 예정된 딜 목록
+- `GET /deals/{id}` - 딜 상세 정보
+- `POST /deals` - 딜 생성 (관리자)
+- `PUT /deals/{id}` - 딜 수정 (관리자)
+- `DELETE /deals/{id}` - 딜 삭제 (관리자)
+- `POST /api/auth/login` - 로그인
+- `POST /api/auth/register` - 회원가입
+- `GET /api/auth/me` - 현재 사용자 정보
+- `POST /reviews` - 리뷰 작성
+- `GET /reviews/deal/{dealId}` - 딜별 리뷰 목록
+- `GET /reviews/stats/{dealId}` - 딜별 리뷰 통계
 
 ### Swagger API 문서
 - **Swagger UI**: `http://localhost:8080/swagger-ui/index.html` - API 문서 및 테스트
@@ -268,16 +308,31 @@ java -jar target/*.jar
 ### 1. 기본 기능 테스트
 
 ```bash
-# 1. 애플리케이션 실행 후 http://localhost:8080 접속
+# 1. 애플리케이션 실행 후 http://localhost:3000 접속
 # 2. 메인 페이지에서 현재 활성 딜 확인
-# 3. 딜 카드 클릭 → 상세 페이지 이동
-# 4. "지금 예약하기" 버튼 클릭 → 예약 폼
-# 5. 예약 정보 입력 → 결제 폼
-# 6. 결제 정보 입력 → 결제 완료
-# 7. 회원가입/로그인 → 대시보드에서 예약 내역 확인
+# 3. 지역별 필터링 테스트 (서울, 부산, 제주도, 도쿄, 방콕)
+# 4. 딜 카드 클릭 → 상세 페이지 이동
+# 5. 리뷰 작성 및 평점 확인
+# 6. "지금 예약하기" 버튼 클릭 → 예약 폼
+# 7. 예약 정보 입력 → 결제 폼
+# 8. 결제 정보 입력 → 예약 성공 페이지
+# 9. 회원가입/로그인 → 마이페이지에서 예약 내역 확인
 ```
 
-### 2. Swagger API 문서 및 테스트
+### 2. 관리자 기능 테스트
+
+```bash
+# 1. 관리자 계정으로 로그인 (admin@flashdeal.com / password)
+# 2. http://localhost:3000/admin 접속
+# 3. 관리자 대시보드에서 통계 확인
+# 4. 최근 사용자에서 "보기" 버튼 클릭 → 사용자 상세 페이지
+# 5. 최근 예약에서 "보기" 버튼 클릭 → 예약 상세 페이지
+# 6. 사용자 상세 페이지에서 예약 내역 확인
+# 7. 예약 상세 페이지에서 고객 정보, 결제 정보 확인
+# 8. 딜 정보 보기 버튼으로 딜 상세 페이지 이동
+```
+
+### 3. Swagger API 문서 및 테스트
 
 ```bash
 # 1. 애플리케이션 실행 후 http://localhost:8080/swagger-ui/index.html 접속
@@ -287,7 +342,7 @@ java -jar target/*.jar
 # 5. 인증이 필요한 API는 "Authorize" 버튼으로 토큰 설정
 ```
 
-### 3. 시뮬레이터 API 테스트
+### 4. 시뮬레이터 API 테스트
 
 ```bash
 # 새 딜 생성 (JSON)
@@ -309,7 +364,7 @@ curl -X POST http://localhost:8080/simulate/deal \
   -d "hotelName=테스트 호텔&originalPrice=200000&discountPct=40"
 ```
 
-### 4. 사용자 인증 API 테스트
+### 5. 사용자 인증 API 테스트
 
 ```bash
 # 회원가입
@@ -335,7 +390,7 @@ curl -X GET http://localhost:8080/api/user/me \
   -H "Cookie: JSESSIONID=<session-id>"
 ```
 
-### 5. 실시간 업데이트 테스트
+### 6. 실시간 업데이트 테스트
 
 ```bash
 # 1. 브라우저에서 http://localhost:8080 접속
@@ -344,7 +399,7 @@ curl -X GET http://localhost:8080/api/user/me \
 # 4. 예약 후 남은 객실 수가 실시간으로 업데이트되는지 확인
 ```
 
-### 6. 동시 예약 테스트
+### 7. 동시 예약 테스트
 
 ```bash
 # 동시에 여러 예약 요청 (오버부킹 방지 테스트)

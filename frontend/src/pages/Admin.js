@@ -23,91 +23,111 @@ import toast from 'react-hot-toast';
 
 const AdminContainer = styled.div`
   min-height: 100vh;
-  background: #f8fafc;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem 0;
 `;
 
 const Container = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1rem;
 `;
 
 const AdminHeader = styled.div`
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 `;
 
 const AdminTitle = styled.h1`
-  font-size: 2rem;
-  font-weight: 800;
-  color: #1f2937;
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0.5rem;
+  text-align: center;
 `;
 
 const AdminSubtitle = styled.p`
-  color: #6b7280;
-  font-size: 1rem;
+  color: #4a5568;
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
 `;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
 `;
 
 const StatCard = styled(motion.div)`
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
 `;
 
 const StatIcon = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background: ${props => {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, ${props => {
     switch(props.color) {
-      case 'blue': return '#dbeafe';
-      case 'green': return '#dcfce7';
-      case 'orange': return '#fed7aa';
-      case 'purple': return '#e9d5ff';
-      default: return '#f3f4f6';
+      case 'blue': return '#667eea 0%, #764ba2 100%';
+      case 'green': return '#48bb78 0%, #38a169 100%';
+      case 'orange': return '#ed8936 0%, #dd6b20 100%';
+      case 'purple': return '#9f7aea 0%, #805ad5 100%';
+      default: return '#a0aec0 0%, #718096 100%';
     }
-  }};
-  color: ${props => {
-    switch(props.color) {
-      case 'blue': return '#2563eb';
-      case 'green': return '#16a34a';
-      case 'orange': return '#ea580c';
-      case 'purple': return '#9333ea';
-      default: return '#6b7280';
-    }
-  }};
-  margin-bottom: 1rem;
+  }});
+  color: white;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 `;
 
 const StatValue = styled.div`
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #2d3748;
   margin-bottom: 0.5rem;
 `;
 
 const StatLabel = styled.div`
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: 1rem;
+  color: #4a5568;
+  font-weight: 600;
 `;
 
 const StatChange = styled.div`
@@ -140,48 +160,71 @@ const Sidebar = styled.div`
 `;
 
 const Card = styled.div`
-  background: #ffffff;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
 `;
 
 const CardTitle = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 `;
 
 const TableHeader = styled.th`
   text-align: left;
-  padding: 0.75rem;
+  padding: 1rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const TableRow = styled.tr`
+  transition: all 0.2s ease;
+  
   &:hover {
-    background: #f9fafb;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    transform: scale(1.01);
+  }
+  
+  &:last-child td {
+    border-bottom: none;
   }
 `;
 
 const TableCell = styled.td`
-  padding: 0.75rem;
+  padding: 1rem;
   font-size: 0.875rem;
-  color: #374151;
-  border-bottom: 1px solid #f3f4f6;
+  color: #4a5568;
+  font-weight: 500;
+  border-bottom: 1px solid #e2e8f0;
 `;
 
 const ActionButton = styled.button`
@@ -281,6 +324,14 @@ const Admin = () => {
 
   const handleViewDeal = (dealId) => {
     navigate(`/deal/${dealId}`);
+  };
+
+  const handleViewUser = (userId) => {
+    navigate(`/admin/user/${userId}`);
+  };
+
+  const handleViewBooking = (bookingId) => {
+    navigate(`/admin/booking/${bookingId}`);
   };
 
   const handleEditDeal = (dealId) => {
@@ -471,7 +522,7 @@ const Admin = () => {
                       <TableCell>{formatPrice(booking.amount)}</TableCell>
                       <TableCell>{formatDate(booking.date)}</TableCell>
                       <TableCell>
-                        <ActionButton onClick={() => handleViewDeal(booking.dealId)}>
+                        <ActionButton onClick={() => handleViewBooking(booking.id)}>
                           <Eye size={14} />
                           보기
                         </ActionButton>
@@ -516,7 +567,7 @@ const Admin = () => {
                       <TableCell>{formatDate(user.joinDate)}</TableCell>
                       <TableCell>{user.bookings}</TableCell>
                       <TableCell>
-                        <ActionButton>
+                        <ActionButton onClick={() => handleViewUser(user.id)}>
                           <Eye size={14} />
                           보기
                         </ActionButton>
