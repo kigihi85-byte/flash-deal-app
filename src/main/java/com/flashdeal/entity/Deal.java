@@ -65,6 +65,16 @@ public class Deal {
     @Column(nullable = false)
     private String location;
     
+    @NotBlank(message = "Country is required")
+    @Size(max = 100, message = "Country must not exceed 100 characters")
+    @Column(nullable = false)
+    private String country;
+    
+    @NotBlank(message = "City is required")
+    @Size(max = 100, message = "City must not exceed 100 characters")
+    @Column(nullable = false)
+    private String city;
+    
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
     
@@ -137,6 +147,12 @@ public class Deal {
     
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+    
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
+    
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
     
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }

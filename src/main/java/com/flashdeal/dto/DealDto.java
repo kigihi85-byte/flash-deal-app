@@ -21,6 +21,8 @@ public class DealDto {
     private Integer totalRooms;
     private Integer remainingRooms;
     private String location;
+    private String country;
+    private String city;
     private String imageUrl;
     private Integer trustScore;
     private DealStatus status;
@@ -49,6 +51,8 @@ public class DealDto {
         this.totalRooms = deal.getTotalRooms();
         this.remainingRooms = deal.getRemainingRooms();
         this.location = deal.getLocation();
+        this.country = deal.getCountry();
+        this.city = deal.getCity();
         this.imageUrl = deal.getImageUrl();
         this.trustScore = deal.getTrustScore();
         this.status = deal.getStatus();
@@ -101,6 +105,12 @@ public class DealDto {
     
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+    
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
+    
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
     
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }

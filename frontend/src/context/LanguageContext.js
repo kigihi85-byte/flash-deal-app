@@ -142,6 +142,20 @@ const translations = {
     paymentSuccess: '결제가 완료되었습니다',
     paymentError: '결제에 실패했습니다',
     
+    // Country Filter
+    country: '국가',
+    city: '도시',
+    selectCountry: '국가 선택',
+    selectCity: '도시 선택',
+    clearFilters: '필터 초기화',
+    
+    // Date Picker
+    checkIn: '체크인',
+    checkOut: '체크아웃',
+    selectDate: '날짜 선택',
+    clearDates: '날짜 초기화',
+    checkInAfterCheckOut: '체크인 날짜는 체크아웃 날짜보다 이전이어야 합니다',
+    
     // Common
     loading: '로딩 중...',
     error: '오류가 발생했습니다',
@@ -277,6 +291,20 @@ const translations = {
     total: 'Total',
     paymentSuccess: 'Payment completed successfully',
     paymentError: 'Payment failed',
+    
+    // Country Filter
+    country: 'Country',
+    city: 'City',
+    selectCountry: 'Select Country',
+    selectCity: 'Select City',
+    clearFilters: 'Clear Filters',
+    
+    // Date Picker
+    checkIn: 'Check-in',
+    checkOut: 'Check-out',
+    selectDate: 'Select Date',
+    clearDates: 'Clear Dates',
+    checkInAfterCheckOut: 'Check-in date must be before check-out date',
     
     // Common
     loading: 'Loading...',

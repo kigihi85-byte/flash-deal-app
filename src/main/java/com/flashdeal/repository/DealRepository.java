@@ -58,4 +58,17 @@ public interface DealRepository extends JpaRepository<Deal, UUID> {
     // Find deals that need status update
     @Query("SELECT d FROM Deal d WHERE (d.status = 'UPCOMING' AND d.startTime <= :now) OR (d.status = 'ACTIVE' AND d.endTime <= :now)")
     List<Deal> findDealsNeedingStatusUpdate(@Param("now") LocalDateTime now);
+    
+    // Country-related queries
+    @Query("SELECT DISTINCT d.country FROM Deal d ORDER BY d.country ASC")
+    List<String> findDistinctCountries();
+    
+    @Query("SELECT d FROM Deal d WHERE LOWER(d.country) = LOWER(:country) ORDER BY d.startTime ASC")
+    List<Deal> findByCountryIgnoreCase(@Param("country") String country);
+    
+    @Query("SELECT DISTINCT d.city FROM Deal d WHERE LOWER(d.country) = LOWER(:country) ORDER BY d.city ASC")
+    List<String> findDistinctCitiesByCountry(@Param("country") String country);
+    
+    @Query("SELECT d FROM Deal d WHERE LOWER(d.country) = LOWER(:country) AND LOWER(d.city) = LOWER(:city) ORDER BY d.startTime ASC")
+    List<Deal> findByCountryAndCityIgnoreCase(@Param("country") String country, @Param("city") String city);
 }

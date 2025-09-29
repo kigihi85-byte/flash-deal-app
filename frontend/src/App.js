@@ -8,6 +8,11 @@ import DealDetail from './pages/DealDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Payment from './pages/Payment';
+import Admin from './pages/Admin';
+import BookingSuccess from './pages/BookingSuccess';
+import MyPage from './pages/MyPage';
+import HotelRegistration from './pages/HotelRegistration';
+import SearchPage from './pages/SearchPage';
 import { DealProvider } from './context/DealContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
@@ -35,8 +40,13 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/deal/:id" element={<DealDetail />} />
               <Route path="/deal/:id/payment" element={<Payment />} />
+              <Route path="/booking-success" element={<BookingSuccess />} />
+              <Route path="/mypage" element={<MyPage />} />
+              <Route path="/hotel-registration" element={<HotelRegistration />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/admin" element={<Admin />} />
             </Routes>
             </MainContent>
             <Toaster 

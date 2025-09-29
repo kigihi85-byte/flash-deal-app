@@ -2,20 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CreditCard, Shield, CheckCircle, User, Mail, Phone, Calendar, MapPin, Star } from 'lucide-react';
+import { CreditCard, MapPin, Calendar, Users, Shield, Check, ArrowLeft, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { dealService } from '../services/api';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const PaymentContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8fafc;
   padding: 2rem 0;
 `;
 
 const Container = styled.div`
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 `;
@@ -24,25 +23,26 @@ const BackButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: white;
-  color: #374151;
-  border: none;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   margin-bottom: 2rem;
   
   &:hover {
-    background: #f3f4f6;
-    transform: translateX(-2px);
+    border-color: #dc2626;
+    color: #dc2626;
   }
 `;
 
 const PaymentGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 2fr 1fr;
   gap: 2rem;
   
   @media (max-width: 768px) {
@@ -50,136 +50,101 @@ const PaymentGrid = styled.div`
   }
 `;
 
-const PaymentForm = styled(motion.div)`
-  background: white;
-  border-radius: 1rem;
+const PaymentForm = styled.div`
+  background: #ffffff;
+  border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 `;
 
-const BookingSummary = styled(motion.div)`
-  background: white;
-  border-radius: 1rem;
+const BookingSummary = styled.div`
+  background: #ffffff;
+  border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
   height: fit-content;
 `;
 
-const Title = styled.h1`
+const SectionTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #1f2937;
   margin-bottom: 1.5rem;
-`;
-
-const Section = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const SectionTitle = styled.h3`
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const Label = styled.label`
-  display: block;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  background: white;
-  transition: all 0.3s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-`;
-
-const PaymentMethod = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
-`;
-
-const PaymentOption = styled.label`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  input[type="radio"] {
-    display: none;
-  }
-  
-  input[type="radio"]:checked + & {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-  }
-  
-  &:hover {
-    border-color: #3b82f6;
-  }
-`;
-
-const PaymentIcon = styled.div`
-  color: #64748b;
-  margin-bottom: 0.5rem;
-`;
-
-const PaymentLabel = styled.span`
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-`;
-
-const HotelInfo = styled.div`
-  border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 1.5rem;
   margin-bottom: 1.5rem;
+`;
+
+const FormLabel = styled.label`
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+`;
+
+const FormInput = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+`;
+
+const FormSelect = styled.select`
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+`;
+
+const FormRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+`;
+
+const HotelCard = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+`;
+
+const HotelImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 `;
 
 const HotelName = styled.h3`
   font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-weight: 600;
+  color: #1f2937;
   margin-bottom: 0.5rem;
 `;
 
@@ -187,30 +152,17 @@ const HotelLocation = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #64748b;
+  color: #6b7280;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 `;
 
-const HotelRating = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #f59e0b;
-  font-size: 0.875rem;
-  font-weight: 500;
-`;
-
 const BookingDetails = styled.div`
-  margin-bottom: 1.5rem;
-`;
-
-const DetailRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
   
   &:last-child {
     border-bottom: none;
@@ -218,69 +170,55 @@ const DetailRow = styled.div`
 `;
 
 const DetailLabel = styled.span`
-  color: #64748b;
+  color: #6b7280;
   font-size: 0.875rem;
 `;
 
 const DetailValue = styled.span`
-  color: #1e293b;
+  color: #1f2937;
   font-weight: 500;
-  font-size: 0.875rem;
 `;
 
 const PriceBreakdown = styled.div`
-  background: #f8fafc;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
 `;
 
 const PriceRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  padding: 0.5rem 0;
   
-  &:last-child {
-    margin-bottom: 0;
-    padding-top: 0.5rem;
-    border-top: 1px solid #e2e8f0;
+  &.total {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 1rem;
+    padding-top: 1rem;
     font-weight: 700;
     font-size: 1.125rem;
+    color: #dc2626;
   }
 `;
 
-const TotalPrice = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: #3b82f6;
-  color: white;
-  border-radius: 0.5rem;
-  font-weight: 700;
-  font-size: 1.25rem;
-`;
-
-const PayButton = styled.button`
+const PaymentButton = styled.button`
   width: 100%;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-  border: none;
   padding: 1rem;
-  border-radius: 0.5rem;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
   font-weight: 600;
-  font-size: 1.125rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  margin-top: 1.5rem;
   
   &:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    background: #b91c1c;
     transform: translateY(-1px);
   }
   
   &:disabled {
-    background: #94a3b8;
+    background: #9ca3af;
     cursor: not-allowed;
     transform: none;
   }
@@ -290,363 +228,297 @@ const SecurityInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #16a34a;
+  color: #6b7280;
   font-size: 0.875rem;
   margin-top: 1rem;
-  justify-content: center;
 `;
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('ko-KR', {
-    style: 'currency',
-    currency: 'KRW',
-    minimumFractionDigits: 0,
-  }).format(price);
-};
 
 const Payment = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [deal, setDeal] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    checkIn: '',
-    checkOut: '',
-    guests: 1,
-    paymentMethod: 'card',
+  const [paymentData, setPaymentData] = useState({
     cardNumber: '',
     expiryDate: '',
     cvv: '',
-    cardName: ''
+    cardholderName: '',
+    email: user?.email || '',
+    phone: '',
+    specialRequests: ''
   });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    const fetchDeal = async () => {
-      try {
-        setLoading(true);
-        const response = await dealService.getDealById(id);
-        setDeal(response.data);
-        
-        // Set default dates
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        setFormData(prev => ({
-          ...prev,
-          checkIn: today.toISOString().split('T')[0],
-          checkOut: tomorrow.toISOString().split('T')[0]
-        }));
-      } catch (error) {
-        toast.error(t('failedToLoadDeal'));
-        navigate('/');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchDealDetails();
+  }, [id]);
 
-    fetchDeal();
-  }, [id, navigate, t]);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setProcessing(true);
-    
+  const fetchDealDetails = async () => {
     try {
-      // TODO: Implement actual payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast.success(t('paymentSuccess'));
-      navigate('/');
+      const response = await fetch(`/deals/${id}`);
+      const data = await response.json();
+      setDeal(data);
     } catch (error) {
-      toast.error(t('paymentError'));
+      console.error('Failed to fetch deal details:', error);
+      toast.error('딜 정보를 불러오는데 실패했습니다.');
     } finally {
-      setProcessing(false);
+      setLoading(false);
     }
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setPaymentData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePayment = async () => {
+    if (!user) {
+      toast.error('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      // 실제 결제 API 호출
+      const response = await fetch(`/deals/${id}/book`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...paymentData,
+          userId: user.id
+        })
+      });
+
+      if (response.ok) {
+        toast.success('결제가 완료되었습니다!');
+        navigate('/booking-success');
+      } else {
+        throw new Error('Payment failed');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('결제 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
   if (loading) {
-    return <LoadingSpinner text={t('loading')} />;
+    return (
+      <PaymentContainer>
+        <Container>
+          <div style={{ textAlign: 'center', padding: '4rem' }}>
+            <Clock size={48} className="animate-spin" />
+            <p>딜 정보를 불러오는 중...</p>
+          </div>
+        </Container>
+      </PaymentContainer>
+    );
   }
 
   if (!deal) {
-    return null;
+    return (
+      <PaymentContainer>
+        <Container>
+          <div style={{ textAlign: 'center', padding: '4rem' }}>
+            <p>딜을 찾을 수 없습니다.</p>
+            <BackButton onClick={() => navigate('/')}>
+              <ArrowLeft size={16} />
+              홈으로 돌아가기
+            </BackButton>
+          </div>
+        </Container>
+      </PaymentContainer>
+    );
   }
-
-  const nights = Math.ceil((new Date(formData.checkOut) - new Date(formData.checkIn)) / (1000 * 60 * 60 * 24));
-  const subtotal = deal.discountedPrice * nights;
-  const tax = subtotal * 0.1; // 10% tax
-  const total = subtotal + tax;
 
   return (
     <PaymentContainer>
       <Container>
-        <BackButton onClick={() => navigate(`/deal/${id}`)}>
-          <ArrowLeft size={20} />
-          {t('backToDeal')}
+        <BackButton onClick={() => navigate(-1)}>
+          <ArrowLeft size={16} />
+          이전 페이지로
         </BackButton>
 
         <PaymentGrid>
-          <PaymentForm
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Title>{t('paymentDetails')}</Title>
-            
-            <form onSubmit={handleSubmit}>
-              <Section>
-                <SectionTitle>
-                  <User size={20} />
-                  {t('guestInformation')}
-                </SectionTitle>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <FormGroup>
-                    <Label>{t('firstName')}</Label>
-                    <Input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>{t('lastName')}</Label>
-                    <Input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </FormGroup>
-                </div>
-                
-                <FormGroup>
-                  <Label>{t('email')}</Label>
-                  <Input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </FormGroup>
-                
-                <FormGroup>
-                  <Label>{t('phoneNumber')}</Label>
-                  <Input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                  />
-                </FormGroup>
-              </Section>
+          <PaymentForm>
+            <SectionTitle>
+              <CreditCard size={24} />
+              결제 정보
+            </SectionTitle>
 
-              <Section>
-                <SectionTitle>
-                  <Calendar size={20} />
-                  {t('bookingDetails')}
-                </SectionTitle>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <FormGroup>
-                    <Label>{t('checkIn')}</Label>
-                    <Input
-                      type="date"
-                      name="checkIn"
-                      value={formData.checkIn}
-                      onChange={handleChange}
-                      required
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>{t('checkOut')}</Label>
-                    <Input
-                      type="date"
-                      name="checkOut"
-                      value={formData.checkOut}
-                      onChange={handleChange}
-                      required
-                    />
-                  </FormGroup>
-                </div>
-                
-                <FormGroup>
-                  <Label>{t('guests')}</Label>
-                  <Select
-                    name="guests"
-                    value={formData.guests}
-                    onChange={handleChange}
-                    required
-                  >
-                    {[1,2,3,4,5,6].map(num => (
-                      <option key={num} value={num}>{num} {t('guests')}</option>
-                    ))}
-                  </Select>
-                </FormGroup>
-              </Section>
+            <FormGroup>
+              <FormLabel>카드 번호</FormLabel>
+              <FormInput
+                type="text"
+                name="cardNumber"
+                value={paymentData.cardNumber}
+                onChange={handleInputChange}
+                placeholder="1234 5678 9012 3456"
+                maxLength="19"
+              />
+            </FormGroup>
 
-              <Section>
-                <SectionTitle>
-                  <CreditCard size={20} />
-                  {t('paymentMethod')}
-                </SectionTitle>
-                
-                <PaymentMethod>
-                  <PaymentOption>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="card"
-                      checked={formData.paymentMethod === 'card'}
-                      onChange={handleChange}
-                    />
-                    <PaymentIcon>
-                      <CreditCard size={24} />
-                    </PaymentIcon>
-                    <PaymentLabel>{t('creditCard')}</PaymentLabel>
-                  </PaymentOption>
-                </PaymentMethod>
-                
-                {formData.paymentMethod === 'card' && (
-                  <>
-                    <FormGroup>
-                      <Label>{t('cardNumber')}</Label>
-                      <Input
-                        type="text"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleChange}
-                        placeholder="1234 5678 9012 3456"
-                        required
-                      />
-                    </FormGroup>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <FormGroup>
-                        <Label>{t('expiryDate')}</Label>
-                        <Input
-                          type="text"
-                          name="expiryDate"
-                          value={formData.expiryDate}
-                          onChange={handleChange}
-                          placeholder="MM/YY"
-                          required
-                        />
-                      </FormGroup>
-                      <FormGroup>
-                        <Label>{t('cvv')}</Label>
-                        <Input
-                          type="text"
-                          name="cvv"
-                          value={formData.cvv}
-                          onChange={handleChange}
-                          placeholder="123"
-                          required
-                        />
-                      </FormGroup>
-                    </div>
-                    
-                    <FormGroup>
-                      <Label>{t('cardholderName')}</Label>
-                      <Input
-                        type="text"
-                        name="cardName"
-                        value={formData.cardName}
-                        onChange={handleChange}
-                        required
-                      />
-                    </FormGroup>
-                  </>
-                )}
-              </Section>
+            <FormRow>
+              <FormGroup>
+                <FormLabel>만료일</FormLabel>
+                <FormInput
+                  type="text"
+                  name="expiryDate"
+                  value={paymentData.expiryDate}
+                  onChange={handleInputChange}
+                  placeholder="MM/YY"
+                  maxLength="5"
+                />
+              </FormGroup>
+              <FormGroup>
+                <FormLabel>CVV</FormLabel>
+                <FormInput
+                  type="text"
+                  name="cvv"
+                  value={paymentData.cvv}
+                  onChange={handleInputChange}
+                  placeholder="123"
+                  maxLength="3"
+                />
+              </FormGroup>
+            </FormRow>
 
-              <PayButton type="submit" disabled={processing}>
-                {processing ? t('processing') : `${t('payNow')} ${formatPrice(total)}`}
-              </PayButton>
-              
-              <SecurityInfo>
-                <Shield size={16} />
-                {t('securePayment')}
-              </SecurityInfo>
-            </form>
+            <FormGroup>
+              <FormLabel>카드 소유자명</FormLabel>
+              <FormInput
+                type="text"
+                name="cardholderName"
+                value={paymentData.cardholderName}
+                onChange={handleInputChange}
+                placeholder="홍길동"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>이메일</FormLabel>
+              <FormInput
+                type="email"
+                name="email"
+                value={paymentData.email}
+                onChange={handleInputChange}
+                placeholder="example@email.com"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>연락처</FormLabel>
+              <FormInput
+                type="tel"
+                name="phone"
+                value={paymentData.phone}
+                onChange={handleInputChange}
+                placeholder="010-1234-5678"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>특별 요청사항</FormLabel>
+              <FormInput
+                type="text"
+                name="specialRequests"
+                value={paymentData.specialRequests}
+                onChange={handleInputChange}
+                placeholder="특별 요청사항이 있으시면 입력해주세요"
+              />
+            </FormGroup>
+
+            <PaymentButton 
+              onClick={handlePayment}
+              disabled={isProcessing}
+            >
+              {isProcessing ? '결제 처리 중...' : `${formatPrice(deal.discountedPrice)} 결제하기`}
+            </PaymentButton>
+
+            <SecurityInfo>
+              <Shield size={16} />
+              SSL 보안 연결로 안전하게 결제됩니다
+            </SecurityInfo>
           </PaymentForm>
 
-          <BookingSummary
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Title>{t('bookingSummary')}</Title>
-            
-            <HotelInfo>
+          <BookingSummary>
+            <SectionTitle>
+              <Check size={24} />
+              예약 요약
+            </SectionTitle>
+
+            <HotelCard>
+              <HotelImage
+                src={deal.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'}
+                alt={deal.hotelName}
+              />
               <HotelName>{deal.hotelName}</HotelName>
               <HotelLocation>
                 <MapPin size={16} />
                 {deal.location}
               </HotelLocation>
-              <HotelRating>
-                <Star size={16} fill="currentColor" />
-                {deal.trustScore}/5
-              </HotelRating>
-            </HotelInfo>
-            
+            </HotelCard>
+
             <BookingDetails>
-              <DetailRow>
-                <DetailLabel>{t('checkIn')}</DetailLabel>
-                <DetailValue>{formData.checkIn}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>{t('checkOut')}</DetailLabel>
-                <DetailValue>{formData.checkOut}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>{t('nights')}</DetailLabel>
-                <DetailValue>{nights}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>{t('guests')}</DetailLabel>
-                <DetailValue>{formData.guests}</DetailValue>
-              </DetailRow>
+              <DetailLabel>체크인</DetailLabel>
+              <DetailValue>2024년 1월 15일</DetailValue>
             </BookingDetails>
-            
+
+            <BookingDetails>
+              <DetailLabel>체크아웃</DetailLabel>
+              <DetailValue>2024년 1월 17일</DetailValue>
+            </BookingDetails>
+
+            <BookingDetails>
+              <DetailLabel>숙박일수</DetailLabel>
+              <DetailValue>2박 3일</DetailValue>
+            </BookingDetails>
+
+            <BookingDetails>
+              <DetailLabel>객실 수</DetailLabel>
+              <DetailValue>1개</DetailValue>
+            </BookingDetails>
+
+            <BookingDetails>
+              <DetailLabel>인원</DetailLabel>
+              <DetailValue>성인 2명</DetailValue>
+            </BookingDetails>
+
             <PriceBreakdown>
               <PriceRow>
-                <span>{formatPrice(deal.discountedPrice)} × {nights} {t('nights')}</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>객실 요금 (2박)</span>
+                <span>{formatPrice(deal.originalPrice)}</span>
               </PriceRow>
               <PriceRow>
-                <span>{t('taxes')}</span>
-                <span>{formatPrice(tax)}</span>
+                <span>할인 (-{deal.discountPercentage}%)</span>
+                <span>-{formatPrice(deal.originalPrice - deal.discountedPrice)}</span>
               </PriceRow>
               <PriceRow>
-                <span>{t('total')}</span>
-                <span>{formatPrice(total)}</span>
+                <span>세금 및 수수료</span>
+                <span>{formatPrice(deal.discountedPrice * 0.1)}</span>
+              </PriceRow>
+              <PriceRow className="total">
+                <span>총 결제 금액</span>
+                <span>{formatPrice(deal.discountedPrice * 1.1)}</span>
               </PriceRow>
             </PriceBreakdown>
-            
-            <TotalPrice>
-              <span>{t('total')}</span>
-              <span>{formatPrice(total)}</span>
-            </TotalPrice>
           </BookingSummary>
         </PaymentGrid>
       </Container>

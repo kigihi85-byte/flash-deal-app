@@ -71,13 +71,12 @@ export const DealProvider = ({ children }) => {
   const fetchActiveDeals = async (page = 0, size = 10) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await dealService.getActiveDealsPaginated(page, size);
-      const { content, totalPages, totalElements } = response.data;
+      const response = await dealService.getActiveDeals();
       
-      dispatch({ type: 'SET_ACTIVE_DEALS', payload: content });
+      dispatch({ type: 'SET_ACTIVE_DEALS', payload: response.data });
       dispatch({ 
         type: 'SET_PAGINATION', 
-        payload: { page, size, totalPages, totalElements } 
+        payload: { page, size, totalPages: 1, totalElements: response.data.length } 
       });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error.message });

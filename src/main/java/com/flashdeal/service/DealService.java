@@ -191,4 +191,26 @@ public class DealService {
     public long getActiveDealsCount() {
         return dealRepository.countActiveDeals(LocalDateTime.now());
     }
+    
+    public List<String> getCountries() {
+        return dealRepository.findDistinctCountries();
+    }
+    
+    public List<DealDto> getDealsByCountry(String country) {
+        List<Deal> deals = dealRepository.findByCountryIgnoreCase(country);
+        return deals.stream()
+                .map(DealDto::new)
+                .collect(Collectors.toList());
+    }
+    
+    public List<String> getCitiesByCountry(String country) {
+        return dealRepository.findDistinctCitiesByCountry(country);
+    }
+    
+    public List<DealDto> getDealsByCountryAndCity(String country, String city) {
+        List<Deal> deals = dealRepository.findByCountryAndCityIgnoreCase(country, city);
+        return deals.stream()
+                .map(DealDto::new)
+                .collect(Collectors.toList());
+    }
 }

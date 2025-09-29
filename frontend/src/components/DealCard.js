@@ -2,21 +2,23 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, Star, Users, Flame } from 'lucide-react';
+import { MapPin, Clock, Star, Users, Flame, Calendar, Heart, X } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useLanguage } from '../context/LanguageContext';
 
 const CardContainer = styled(motion.div)`
-  background: white;
-  border-radius: 1rem;
+  background: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
   position: relative;
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #dc2626;
   }
 `;
 
@@ -39,66 +41,73 @@ const DealImage = styled.img`
 
 const StatusBadge = styled.div`
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  
-  ${props => props.status === 'active' && `
-    background: #10b981;
-    color: white;
-  `}
-  
-  ${props => props.status === 'upcoming' && `
-    background: #f59e0b;
-    color: white;
-  `}
-  
-  ${props => props.status === 'sold_out' && `
-    background: #ef4444;
-    color: white;
-  `}
-`;
-
-const DiscountBadge = styled.div`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #ef4444;
+  background: ${props => {
+    switch(props.status) {
+      case 'ACTIVE': return '#dc2626';
+      case 'UPCOMING': return '#ea580c';
+      case 'EXPIRED': return '#6b7280';
+      default: return '#6b7280';
+    }
+  }};
   color: white;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  font-weight: 700;
-  font-size: 0.875rem;
 `;
 
-const ContentContainer = styled.div`
+const WishlistButton = styled.button`
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: white;
+    transform: scale(1.1);
+  }
+`;
+
+const CardContent = styled.div`
   padding: 1.5rem;
 `;
 
 const HotelName = styled.h3`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
   margin-bottom: 0.5rem;
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 const Location = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #64748b;
+  color: #6b7280;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 `;
 
 const Description = styled.p`
-  color: #64748b;
+  color: #6b7280;
   font-size: 0.875rem;
   line-height: 1.5;
   margin-bottom: 1rem;
@@ -108,35 +117,54 @@ const Description = styled.p`
   overflow: hidden;
 `;
 
-const PriceContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-`;
-
-const OriginalPrice = styled.span`
-  color: #94a3b8;
-  text-decoration: line-through;
-  font-size: 0.875rem;
-`;
-
-const DiscountedPrice = styled.span`
-  color: #ef4444;
-  font-size: 1.5rem;
-  font-weight: 700;
-`;
-
-const PricePerNight = styled.span`
-  color: #64748b;
-  font-size: 0.75rem;
-`;
-
-const InfoContainer = styled.div`
+const PriceSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+`;
+
+const PriceContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const OriginalPrice = styled.div`
+  font-size: 0.875rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+`;
+
+const DiscountedPrice = styled.div`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #dc2626;
+`;
+
+const DiscountBadge = styled.div`
+  background: #dc2626;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+`;
+
+const DetailsSection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+`;
+
+const DetailItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #6b7280;
+  font-size: 0.75rem;
 `;
 
 const TrustScore = styled.div`
@@ -144,185 +172,227 @@ const TrustScore = styled.div`
   align-items: center;
   gap: 0.25rem;
   color: #f59e0b;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
 `;
 
-const RemainingRooms = styled.div`
+const RoomsInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #64748b;
-  font-size: 0.875rem;
+  color: #6b7280;
+  font-size: 0.75rem;
 `;
 
-const TimeContainer = styled.div`
+const TimeInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #64748b;
-  font-size: 0.875rem;
   margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 6px;
+`;
+
+const TimeLabel = styled.div`
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
+const TimeValue = styled.div`
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+`;
+
+const ActionSection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const BookButton = styled(Link)`
-  display: block;
-  width: 100%;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #dc2626;
   color: white;
   text-decoration: none;
-  text-align: center;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 6px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
   
   &:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    background: #b91c1c;
     transform: translateY(-1px);
-  }
-  
-  &:disabled {
-    background: #94a3b8;
-    cursor: not-allowed;
-    transform: none;
   }
 `;
 
-const SoldOutButton = styled.div`
-  display: block;
-  width: 100%;
-  background: #94a3b8;
-  color: white;
-  text-align: center;
+const NotAvailableButton = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-radius: 6px;
   font-weight: 600;
+  font-size: 0.875rem;
   cursor: not-allowed;
 `;
 
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('ko-KR', {
-    style: 'currency',
-    currency: 'KRW',
-    minimumFractionDigits: 0,
-  }).format(price);
-};
-
-const formatTimeRemaining = (endTime, t) => {
-  const now = new Date();
-  const end = new Date(endTime);
-  const diff = end - now;
-  
-  if (diff <= 0) return t('expired');
-  
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${t('left')}`;
-  } else {
-    return `${minutes}m ${t('left')}`;
-  }
-};
-
-const formatTimeUntilStart = (startTime, t) => {
-  const now = new Date();
-  const start = new Date(startTime);
-  const diff = start - now;
-  
-  if (diff <= 0) return t('startingNow');
-  
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  
-  if (hours > 0) {
-    return `${t('startsIn')} ${hours}h ${minutes}m`;
-  } else {
-    return `${t('startsIn')} ${minutes}m`;
-  }
-};
-
 const DealCard = ({ deal }) => {
-  const { t } = useLanguage();
-  
-  const getStatus = () => {
-    if (deal.status === 'SOLD_OUT' || deal.remainingRooms === 0) return 'sold_out';
-    if (deal.active) return 'active';
-    if (deal.upcoming) return 'upcoming';
-    return 'expired';
+  const { t, language } = useLanguage();
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat(language === 'ko' ? 'ko-KR' : 'en-US', {
+      style: 'currency',
+      currency: 'KRW',
+      minimumFractionDigits: 0,
+    }).format(price);
   };
 
-  const status = getStatus();
-  const canBook = status === 'active' && deal.remainingRooms > 0;
+  const formatTimeRemaining = (timeRemaining) => {
+    if (!timeRemaining) return '';
+    
+    const hours = Math.floor(timeRemaining / 3600);
+    const minutes = Math.floor((timeRemaining % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}시간 ${minutes}분`;
+    } else {
+      return `${minutes}분`;
+    }
+  };
+
+  const formatTimeUntilStart = (timeUntilStart) => {
+    if (!timeUntilStart) return '';
+    
+    const hours = Math.floor(timeUntilStart / 3600);
+    const minutes = Math.floor((timeUntilStart % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}시간 ${minutes}분`;
+    } else {
+      return `${minutes}분`;
+    }
+  };
+
+  const getStatusText = () => {
+    if (deal.active) return t('live');
+    if (deal.upcoming) return t('upcoming');
+    return t('expired');
+  };
+
+  const getStatusColor = () => {
+    if (deal.active) return 'ACTIVE';
+    if (deal.upcoming) return 'UPCOMING';
+    return 'EXPIRED';
+  };
+
+  const renderStars = (score) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        size={12}
+        fill={i < score ? '#f59e0b' : '#e5e7eb'}
+        color={i < score ? '#f59e0b' : '#e5e7eb'}
+      />
+    ));
+  };
 
   return (
     <CardContainer
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
+      whileHover={{ scale: 1.02 }}
     >
       <ImageContainer>
         <DealImage
           src={deal.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'}
           alt={deal.hotelName}
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800';
+          }}
         />
-        <StatusBadge status={status}>
-          {status === 'active' && t('live')}
-          {status === 'upcoming' && t('upcoming')}
-          {status === 'sold_out' && t('soldOut')}
-          {status === 'expired' && t('expired')}
+        <StatusBadge status={getStatusColor()}>
+          {getStatusText()}
         </StatusBadge>
-        <DiscountBadge>
-          -{deal.discountPercentage}%
-        </DiscountBadge>
+        <WishlistButton>
+          <Heart size={16} />
+        </WishlistButton>
       </ImageContainer>
-      
-      <ContentContainer>
+
+      <CardContent>
         <HotelName>{deal.hotelName}</HotelName>
         
         <Location>
-          <MapPin size={16} />
+          <MapPin size={14} />
           {deal.location}
         </Location>
-        
-        <Description>{deal.description}</Description>
-        
-        <PriceContainer>
-          <OriginalPrice>{formatPrice(deal.originalPrice)}</OriginalPrice>
-          <DiscountedPrice>{formatPrice(deal.discountedPrice)}</DiscountedPrice>
-          <PricePerNight>{t('perNight')}</PricePerNight>
-        </PriceContainer>
-        
-        <InfoContainer>
-          <TrustScore>
-            <Star size={16} fill="currentColor" />
-            {deal.trustScore}/5
-          </TrustScore>
-          <RemainingRooms>
-            <Users size={16} />
-            {deal.remainingRooms} {t('roomsLeft')}
-          </RemainingRooms>
-        </InfoContainer>
-        
-        <TimeContainer>
-          <Clock size={16} />
-          {deal.active && formatTimeRemaining(deal.endTime, t)}
-          {deal.upcoming && formatTimeUntilStart(deal.startTime, t)}
-          {status === 'sold_out' && t('soldOut')}
-          {status === 'expired' && t('expired')}
-        </TimeContainer>
-        
-        {canBook ? (
-          <BookButton to={`/deal/${deal.id}`}>
-            {t('bookNow')}
-          </BookButton>
-        ) : (
-          <SoldOutButton>
-            {status === 'sold_out' ? t('soldOut') : t('notAvailable')}
-          </SoldOutButton>
+
+        {deal.description && (
+          <Description>{deal.description}</Description>
         )}
-      </ContentContainer>
+
+        <PriceSection>
+          <PriceContainer>
+            <OriginalPrice>{formatPrice(deal.originalPrice)}</OriginalPrice>
+            <DiscountedPrice>{formatPrice(deal.discountedPrice)}</DiscountedPrice>
+          </PriceContainer>
+          <DiscountBadge>-{deal.discountPercentage}%</DiscountBadge>
+        </PriceSection>
+
+        <DetailsSection>
+          <TrustScore>
+            {renderStars(deal.trustScore)}
+            <span>{deal.trustScore}/5</span>
+          </TrustScore>
+          <RoomsInfo>
+            <Users size={12} />
+            {deal.remainingRooms} {t('roomsLeft')}
+          </RoomsInfo>
+        </DetailsSection>
+
+        {(deal.timeRemaining > 0 || deal.timeUntilStart > 0) && (
+          <TimeInfo>
+            <Clock size={14} />
+            <div>
+              <TimeLabel>
+                {deal.active ? t('left') : t('startsIn')}
+              </TimeLabel>
+              <TimeValue>
+                {deal.active 
+                  ? formatTimeRemaining(deal.timeRemaining)
+                  : formatTimeUntilStart(deal.timeUntilStart)
+                }
+              </TimeValue>
+            </div>
+          </TimeInfo>
+        )}
+
+        <ActionSection>
+          {deal.active && deal.remainingRooms > 0 ? (
+            <BookButton to={`/deal/${deal.id}`}>
+              <Calendar size={16} />
+              {t('bookNow')}
+            </BookButton>
+          ) : (
+            <NotAvailableButton>
+              <X size={16} />
+              {deal.remainingRooms === 0 ? t('soldOut') : t('notAvailable')}
+            </NotAvailableButton>
+          )}
+        </ActionSection>
+      </CardContent>
     </CardContainer>
   );
 };

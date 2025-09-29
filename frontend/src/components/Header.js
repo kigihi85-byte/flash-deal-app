@@ -2,21 +2,17 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Search, Clock, Flame, Menu, X, Globe, User, LogIn, LogOut, Settings } from 'lucide-react';
-import { useDeals } from '../context/DealContext';
-import { useLanguage } from '../context/LanguageContext';
+import { Search, Flame, Menu, X, User, LogOut, Settings, Users, ChevronRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const HeaderContainer = styled.header`
-  position: fixed;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const HeaderContent = styled.div`
@@ -26,7 +22,58 @@ const HeaderContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
+  height: 70px;
+  position: relative;
+`;
+
+const SearchContainer = styled.div`
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  &:focus-within {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+`;
+
+const SearchInput = styled.input`
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  
+  &::placeholder {
+    color: #9ca3af;
+  }
+`;
+
+const SearchButton = styled.button`
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  
+  &:hover {
+    color: #dc2626;
+  }
+`;
+
+const LeftSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2rem;
 `;
 
 const Logo = styled(Link)`
@@ -34,432 +81,325 @@ const Logo = styled(Link)`
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  color: #1e293b;
-  font-weight: 700;
+  color: #dc2626;
   font-size: 1.5rem;
-  
+  font-weight: 800;
+  transition: all 0.2s ease;
+  margin-right: 2rem;
+
   &:hover {
-    color: #3b82f6;
+    color: #b91c1c;
+    transform: scale(1.05);
   }
 `;
 
-const LogoIcon = styled(Flame)`
-  color: #f59e0b;
+const LogoIcon = styled.div`
   width: 2rem;
   height: 2rem;
-`;
-
-const SearchContainer = styled.div`
-  position: relative;
-  flex: 1;
-  max-width: 500px;
-  margin: 0 2rem;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 3rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 2rem;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
   font-size: 1rem;
-  background: white;
-  transition: all 0.3s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-  
-  &::placeholder {
-    color: #94a3b8;
-  }
-`;
-
-const SearchIcon = styled(Search)`
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  width: 1.25rem;
-  height: 1.25rem;
 `;
 
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
 `;
 
 const NavLink = styled(Link)`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   text-decoration: none;
-  color: #64748b;
+  color: #374151;
   font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-  }
-`;
-
-const MobileMenuButton = styled.button`
-  display: none;
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  
-  &:hover {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-  }
-  
-  @media (max-width: 768px) {
-    display: block;
-  }
-`;
-
-const MobileMenu = styled(motion.div)`
-  position: fixed;
-  top: 80px;
-  left: 0;
-  right: 0;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 1rem;
-  display: none;
-  
-  @media (max-width: 768px) {
-    display: block;
-  }
-`;
-
-const MobileNav = styled.nav`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const MobileNavLink = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: #64748b;
-  font-weight: 500;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-  }
-`;
-
-const StatsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: #64748b;
   font-size: 0.875rem;
-  
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const StatItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-`;
-
-const LanguageSwitcher = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.5rem;
   padding: 0.5rem 1rem;
-  color: #64748b;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  min-width: 80px;
-  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
   
   &:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    min-width: 60px;
+    color: #dc2626;
+    background: #fef2f2;
   }
 `;
 
-const AuthButtons = styled.div`
+const RightSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  
-  @media (max-width: 768px) {
-    display: none;
-  }
+  gap: 1rem;
 `;
 
-const AuthButton = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+const RegisterButton = styled(Link)`
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  text-decoration: none;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #3b82f6;
+  font-size: 0.875rem;
   font-weight: 500;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
   
-  &.login {
-    color: #64748b;
-    
-    &:hover {
-      color: #3b82f6;
-      background: rgba(59, 130, 246, 0.1);
-    }
+  &:hover {
+    background: #eff6ff;
+  }
+`;
+
+const ProfileIcon = styled.div`
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #e5e7eb;
+  }
+`;
+
+const FlagIcon = styled.div`
+  width: 1.5rem;
+  height: 1rem;
+  background: #dc2626;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: #ffffff;
   }
   
-  &.signup {
-    background: #3b82f6;
-    color: white;
-    
-    &:hover {
-      background: #1d4ed8;
-    }
+  &::after {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    width: 50%;
+    height: 50%;
+    background: #000000;
+    border-radius: 50%;
+  }
+`;
+
+const CurrencySymbol = styled.span`
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+`;
+
+const LoginLink = styled(Link)`
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const SignUpButton = styled.button`
+  padding: 0.5rem 1rem;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #3b82f6;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #eff6ff;
   }
 `;
 
 const UserMenu = styled.div`
-  position: relative;
   display: flex;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
 `;
 
-const UserButton = styled.button`
+const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+`;
+
+const UserName = styled.span`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+`;
+
+const UserEmail = styled.span`
+  font-size: 0.75rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+`;
+
+const UserProfileLink = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #374151;
   border: none;
-  background: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #64748b;
-  
-  &:hover {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-  }
-`;
-
-const UserDropdown = styled(motion.div)`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-  min-width: 200px;
-  z-index: 1000;
-  overflow: hidden;
-`;
-
-const DropdownItem = styled.button`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: none;
-  text-align: left;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #374151;
-  
+  text-decoration: none;
+  white-space: nowrap;
+
   &:hover {
-    background: #f8fafc;
+    background: #e5e7eb;
+    color: #dc2626;
   }
-  
-  &:not(:last-child) {
-    border-bottom: 1px solid #e2e8f0;
+`;
+
+const LogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: #e5e7eb;
+    color: #dc2626;
   }
 `;
 
 const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const { searchDeals, activeDeals, upcomingDeals } = useDeals();
-  const { language, toggleLanguage, t } = useLanguage();
-  const { user, logout, isAuthenticated } = useAuth();
 
   const handleSearch = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    searchDeals(query);
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+    }
   };
 
   return (
     <HeaderContainer>
       <HeaderContent>
-        <Logo to="/">
-          <LogoIcon />
-          FlashDeal
-        </Logo>
-        
+        <LeftSection>
+          <Logo to="/">
+            <LogoIcon>F</LogoIcon>
+            FlashDeal
+          </Logo>
+          
+          <Nav>
+            <NavLink to="/search">
+              <span>숙소</span>
+            </NavLink>
+            
+            <NavLink to="/activities">
+              <span>즐길 거리</span>
+            </NavLink>
+          </Nav>
+        </LeftSection>
+
         <SearchContainer>
-          <SearchIcon />
-          <SearchInput
-            type="text"
-            placeholder={t('searchPlaceholder')}
-            value={searchQuery}
-            onChange={handleSearch}
-          />
+          <form onSubmit={handleSearch}>
+            <SearchInput
+              type="text"
+              placeholder="호텔명, 도시, 지역을 검색하세요"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <SearchButton type="submit">
+              <Search size={16} />
+            </SearchButton>
+          </form>
         </SearchContainer>
-        
-        <Nav>
-          <NavLink to="/">
-            <Flame />
-            {t('activeDeals')} ({activeDeals.length})
-          </NavLink>
-          <NavLink to="/upcoming">
-            <Clock />
-            {t('upcomingDeals')} ({upcomingDeals.length})
-          </NavLink>
+
+        <RightSection>
+          <RegisterButton to="/hotel-registration">
+            숙소 등록
+          </RegisterButton>
           
-          <LanguageSwitcher onClick={toggleLanguage}>
-            <Globe size={16} />
-            {language === 'ko' ? 'KOR' : 'ENG'}
-          </LanguageSwitcher>
+          <ProfileIcon>
+            <User size={16} />
+          </ProfileIcon>
           
-          {isAuthenticated ? (
-            <UserMenu>
-              <UserButton onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
-                <User size={16} />
-                {user?.fullName || user?.email}
-              </UserButton>
-              {isUserMenuOpen && (
-                <UserDropdown
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                >
-                  <DropdownItem>
+          <FlagIcon />
+          
+          <CurrencySymbol>₩</CurrencySymbol>
+          
+          {user ? (
+            <>
+              <UserMenu>
+                <UserInfo>
+                  <UserName>{user.fullName}</UserName>
+                  <UserEmail>{user.email}</UserEmail>
+                </UserInfo>
+                <UserProfileLink to="/mypage">
+                  <User size={16} />
+                  마이페이지
+                </UserProfileLink>
+                {user.role === 'ADMIN' && (
+                  <UserProfileLink to="/admin">
                     <Settings size={16} />
-                    {t('myPage')}
-                  </DropdownItem>
-                  <DropdownItem onClick={logout}>
-                    <LogOut size={16} />
-                    {t('logout')}
-                  </DropdownItem>
-                </UserDropdown>
-              )}
-            </UserMenu>
+                    관리자
+                  </UserProfileLink>
+                )}
+                <LogoutButton onClick={logout}>
+                  <LogOut size={16} />
+                  로그아웃
+                </LogoutButton>
+              </UserMenu>
+            </>
           ) : (
-            <AuthButtons>
-              <AuthButton to="/login" className="login">
-                <LogIn size={16} />
-                {t('login')}
-              </AuthButton>
-              <AuthButton to="/register" className="signup">
-                <User size={16} />
-                {t('signUp')}
-              </AuthButton>
-            </AuthButtons>
+            <>
+              <LoginLink to="/login">
+                로그인
+              </LoginLink>
+              
+              <SignUpButton>
+                회원 가입
+              </SignUpButton>
+            </>
           )}
-          
-          <MobileMenuButton onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </MobileMenuButton>
-        </Nav>
-        
-        <StatsContainer>
-          <StatItem>
-            <Flame size={16} />
-            {activeDeals.length} {t('active')}
-          </StatItem>
-          <StatItem>
-            <Clock size={16} />
-            {upcomingDeals.length} {t('upcoming')}
-          </StatItem>
-        </StatsContainer>
+        </RightSection>
       </HeaderContent>
-      
-      {isMobileMenuOpen && (
-        <MobileMenu
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-        >
-          <MobileNav>
-            <MobileNavLink to="/" onClick={() => setIsMobileMenuOpen(false)}>
-              <Flame size={20} />
-              {t('activeDeals')} ({activeDeals.length})
-            </MobileNavLink>
-            <MobileNavLink to="/upcoming" onClick={() => setIsMobileMenuOpen(false)}>
-              <Clock size={20} />
-              {t('upcomingDeals')} ({upcomingDeals.length})
-            </MobileNavLink>
-            <LanguageSwitcher onClick={toggleLanguage}>
-              <Globe size={20} />
-              {language === 'ko' ? 'KOR' : 'ENG'}
-            </LanguageSwitcher>
-            {isAuthenticated ? (
-              <>
-                <DropdownItem onClick={() => setIsMobileMenuOpen(false)}>
-                  <Settings size={20} />
-                  {t('myPage')}
-                </DropdownItem>
-                <DropdownItem onClick={() => { logout(); setIsMobileMenuOpen(false); }}>
-                  <LogOut size={20} />
-                  {t('logout')}
-                </DropdownItem>
-              </>
-            ) : (
-              <>
-                <AuthButton to="/login" className="login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <LogIn size={20} />
-                  {t('login')}
-                </AuthButton>
-                <AuthButton to="/register" className="signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  <User size={20} />
-                  {t('signUp')}
-                </AuthButton>
-              </>
-            )}
-          </MobileNav>
-        </MobileMenu>
-      )}
     </HeaderContainer>
   );
 };

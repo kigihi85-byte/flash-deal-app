@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Clock, Star, Users, Calendar, Shield, CheckCircle, Wifi, Car, Coffee, Dumbbell, Utensils, Heart, Share2, Phone, Mail, Navigation } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Star, Users, Calendar, Shield, CheckCircle, Wifi, Car, Coffee, Dumbbell, Utensils, Heart, Share2, Phone, Mail, Navigation, MessageCircle } from 'lucide-react';
 import { dealService } from '../services/api';
 import { useDeals } from '../context/DealContext';
 import { useLanguage } from '../context/LanguageContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ReviewCard from '../components/ReviewCard';
+import ReviewForm from '../components/ReviewForm';
 import toast from 'react-hot-toast';
 
 const DetailContainer = styled.div`
@@ -403,6 +405,74 @@ const TrustFeature = styled.div`
   font-size: 0.875rem;
 `;
 
+const ReviewsSection = styled(motion.div)`
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+`;
+
+const ReviewsHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+`;
+
+const ReviewsTitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const ReviewsStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const AverageRating = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+`;
+
+const ReviewCount = styled.span`
+  color: #6b7280;
+  font-size: 0.875rem;
+`;
+
+const WriteReviewButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #b91c1c;
+  }
+`;
+
+const ReviewsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
 const ContactSection = styled.div`
   background: white;
   border-radius: 1rem;
@@ -504,13 +574,6 @@ const FeatureDescription = styled.p`
   font-size: 0.875rem;
 `;
 
-const ReviewsSection = styled.div`
-  background: white;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-`;
 
 const ReviewsSummary = styled.div`
   display: flex;
@@ -538,10 +601,6 @@ const ScoreText = styled.span`
   color: #1f2937;
 `;
 
-const ReviewCount = styled.span`
-  color: #6b7280;
-  font-size: 0.875rem;
-`;
 
 const ReviewBreakdown = styled.div`
   flex: 1;
@@ -682,12 +741,13 @@ const formatTimeUntilStart = (startTime, t) => {
 const DealDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { bookRoom } = useDeals();
   const { t } = useLanguage();
   const [deal, setDeal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   useEffect(() => {
     const fetchDeal = async () => {
@@ -714,6 +774,25 @@ const DealDetail = () => {
       toast.error('예약에 실패했습니다');
     } finally {
       setBooking(false);
+    }
+  };
+
+  const handleReviewSubmit = async (reviewData) => {
+    setIsSubmittingReview(true);
+    try {
+      // 실제로는 API 호출
+      console.log('리뷰 제출:', reviewData);
+      
+      // 임시로 성공 처리
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('리뷰가 성공적으로 작성되었습니다!');
+      setShowReviewForm(false);
+    } catch (error) {
+      console.error('리뷰 제출 오류:', error);
+      toast.error('리뷰 작성 중 오류가 발생했습니다');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -1165,6 +1244,79 @@ const DealDetail = () => {
             </BookingCard>
           </RightColumn>
         </MainContent>
+
+        {/* 리뷰 섹션 */}
+        <ReviewsSection
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <ReviewsHeader>
+            <ReviewsTitle>
+              <Star size={24} />
+              고객 리뷰
+            </ReviewsTitle>
+            <ReviewsStats>
+              <AverageRating>
+                <Star size={20} fill="#fbbf24" color="#fbbf24" />
+                4.5
+              </AverageRating>
+              <ReviewCount>127개 리뷰</ReviewCount>
+              <WriteReviewButton onClick={() => setShowReviewForm(true)}>
+                <MessageCircle size={16} />
+                리뷰 작성
+              </WriteReviewButton>
+            </ReviewsStats>
+          </ReviewsHeader>
+
+          {showReviewForm && (
+            <ReviewForm
+              onSubmit={handleReviewSubmit}
+              onCancel={() => setShowReviewForm(false)}
+              isSubmitting={isSubmittingReview}
+            />
+          )}
+
+          <ReviewsList>
+            {/* 샘플 리뷰 데이터 */}
+            <ReviewCard
+              review={{
+                id: '1',
+                userName: '김철수',
+                rating: 5,
+                comment: '정말 만족스러운 숙박이었습니다. 직원들이 친절하고 시설이 깔끔했어요.',
+                isVerified: true,
+                helpfulCount: 12,
+                createdAt: '2024-01-10T10:00:00Z'
+              }}
+              onHelpfulClick={() => {}}
+            />
+            <ReviewCard
+              review={{
+                id: '2',
+                userName: '이영희',
+                rating: 4,
+                comment: '가격 대비 훌륭한 호텔입니다. 위치도 좋고 편의시설도 잘 갖춰져 있어요.',
+                isVerified: true,
+                helpfulCount: 8,
+                createdAt: '2024-01-08T15:30:00Z'
+              }}
+              onHelpfulClick={() => {}}
+            />
+            <ReviewCard
+              review={{
+                id: '3',
+                userName: '박민수',
+                rating: 5,
+                comment: '체크인부터 체크아웃까지 모든 것이 완벽했습니다. 다시 방문하고 싶어요!',
+                isVerified: false,
+                helpfulCount: 15,
+                createdAt: '2024-01-05T09:15:00Z'
+              }}
+              onHelpfulClick={() => {}}
+            />
+          </ReviewsList>
+        </ReviewsSection>
       </Container>
     </DetailContainer>
   );

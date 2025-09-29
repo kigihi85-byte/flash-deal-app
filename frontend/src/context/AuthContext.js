@@ -38,15 +38,21 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('Login attempt:', email);
       const response = await authService.login(email, password);
+      console.log('Login response:', response.data);
       const { token, user: userData } = response.data;
       
       localStorage.setItem('token', token);
       setUser(userData);
       
+      console.log('User set:', userData);
+      console.log('Token stored:', token);
+      
       toast.success('로그인 성공');
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
       toast.error(error.response?.data?.message || '로그인 실패');
       return { success: false, error: error.response?.data?.message || '로그인 실패' };
     }

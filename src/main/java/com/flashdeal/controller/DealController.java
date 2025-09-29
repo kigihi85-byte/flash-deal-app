@@ -77,6 +77,32 @@ public class DealController {
         return ResponseEntity.ok(deals);
     }
     
+    @GetMapping("/countries")
+    public ResponseEntity<List<String>> getCountries() {
+        List<String> countries = dealService.getCountries();
+        return ResponseEntity.ok(countries);
+    }
+    
+    @GetMapping("/country/{country}")
+    public ResponseEntity<List<DealDto>> getDealsByCountry(@PathVariable String country) {
+        List<DealDto> deals = dealService.getDealsByCountry(country);
+        return ResponseEntity.ok(deals);
+    }
+    
+    @GetMapping("/country/{country}/cities")
+    public ResponseEntity<List<String>> getCitiesByCountry(@PathVariable String country) {
+        List<String> cities = dealService.getCitiesByCountry(country);
+        return ResponseEntity.ok(cities);
+    }
+    
+    @GetMapping("/country/{country}/city/{city}")
+    public ResponseEntity<List<DealDto>> getDealsByCountryAndCity(
+            @PathVariable String country, 
+            @PathVariable String city) {
+        List<DealDto> deals = dealService.getDealsByCountryAndCity(country, city);
+        return ResponseEntity.ok(deals);
+    }
+    
     @PostMapping
     public ResponseEntity<DealDto> createDeal(@Valid @RequestBody CreateDealRequest request) {
         try {
