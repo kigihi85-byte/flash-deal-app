@@ -241,6 +241,33 @@ docker-compose down -v
 - **백엔드 API**: http://localhost:8080
 - **Swagger 문서**: http://localhost:8080/swagger-ui/index.html
 
+### Windows + Rancher Desktop 사용 시 주의사항
+
+Windows에서 Rancher Desktop을 사용하는 경우, 프론트엔드 컨테이너가 제대로 동작하도록 다음이 설정되어 있습니다:
+
+1. **환경 변수 설정**
+   - `HOST=0.0.0.0`: 모든 네트워크 인터페이스에서 접근 가능하도록 설정
+   - `WATCHPACK_POLLING=true`: 파일 변경 감지 최적화
+
+2. **포트 확인**
+   ```bash
+   # 컨테이너 상태 확인
+   docker ps
+   
+   # 프론트엔드 로그 확인
+   docker logs flashdeal-frontend
+   
+   # 모든 컨테이너 재시작
+   docker-compose restart
+   ```
+
+3. **접속 테스트**
+   - 브라우저에서 http://localhost:3000 접속
+   - 만약 접속이 안 되면:
+     - Rancher Desktop의 터미널에서 `docker-compose logs -f frontend` 실행
+     - "webpack compiled" 메시지가 나오는지 확인
+     - "http://0.0.0.0:3000" 주소가 보이는지 확인
+
 ### 2. 로컬 개발 환경
 
 #### 필수 요구사항
