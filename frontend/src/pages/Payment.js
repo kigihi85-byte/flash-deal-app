@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { CreditCard, MapPin, Calendar, Users, Shield, Check, ArrowLeft, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { dealService } from '../services/api';
 import toast from 'react-hot-toast';
 
 const PaymentContainer = styled.div`
@@ -257,12 +258,13 @@ const Payment = () => {
 
   const fetchDealDetails = async () => {
     try {
-      const response = await fetch(`/deals/${id}`);
-      const data = await response.json();
-      setDeal(data);
+      setLoading(true);
+      const response = await dealService.getDealById(id);
+      setDeal(response.data);
     } catch (error) {
       console.error('Failed to fetch deal details:', error);
       toast.error('딜 정보를 불러오는데 실패했습니다.');
+      setDeal(null);
     } finally {
       setLoading(false);
     }
@@ -287,23 +289,9 @@ const Payment = () => {
     
     try {
       // 실제 결제 API 호출
-      const response = await fetch(`/deals/${id}/book`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...paymentData,
-          userId: user.id
-        })
-      });
-
-      if (response.ok) {
-        toast.success('결제가 완료되었습니다!');
-        navigate('/booking-success');
-      } else {
-        throw new Error('Payment failed');
-      }
+      await dealService.bookRoom(id);
+      toast.success('결제가 완료되었습니다!');
+      navigate('/booking-success');
     } catch (error) {
       console.error('Payment error:', error);
       toast.error('결제 중 오류가 발생했습니다.');
@@ -337,8 +325,30 @@ const Payment = () => {
     return (
       <PaymentContainer>
         <Container>
-          <div style={{ textAlign: 'center', padding: '4rem' }}>
-            <p>딜을 찾을 수 없습니다.</p>
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '4rem 2rem',
+            minHeight: '60vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <h2 style={{ 
+              fontSize: '2rem', 
+              fontWeight: '700', 
+              color: '#1f2937',
+              marginBottom: '1rem'
+            }}>
+              딜을 찾을 수 없습니다
+            </h2>
+            <p style={{ 
+              fontSize: '1.125rem', 
+              color: '#6b7280',
+              marginBottom: '2rem'
+            }}>
+              요청하신 딜을 찾을 수 없습니다.
+            </p>
             <BackButton onClick={() => navigate('/')}>
               <ArrowLeft size={16} />
               홈으로 돌아가기

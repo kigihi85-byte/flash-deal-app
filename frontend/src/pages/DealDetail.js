@@ -756,8 +756,9 @@ const DealDetail = () => {
         const response = await dealService.getDealById(id);
         setDeal(response.data);
       } catch (error) {
+        console.error('Error fetching deal:', error);
         toast.error('딜 정보를 불러오는데 실패했습니다');
-        navigate('/');
+        setDeal(null);
       } finally {
         setLoading(false);
       }
@@ -804,10 +805,35 @@ const DealDetail = () => {
     return (
       <DetailContainer>
         <Container>
-          <BackButton onClick={() => navigate('/')}>
-            <ArrowLeft size={20} />
-            {t('backToDeals')}
-          </BackButton>
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '4rem 2rem',
+            minHeight: '60vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <h2 style={{ 
+              fontSize: '2rem', 
+              fontWeight: '700', 
+              color: '#1f2937',
+              marginBottom: '1rem'
+            }}>
+              딜을 찾을 수 없습니다
+            </h2>
+            <p style={{ 
+              fontSize: '1.125rem', 
+              color: '#6b7280',
+              marginBottom: '2rem'
+            }}>
+              요청하신 딜을 찾을 수 없습니다.
+            </p>
+            <BackButton onClick={() => navigate('/')}>
+              <ArrowLeft size={20} />
+              홈으로 돌아가기
+            </BackButton>
+          </div>
         </Container>
       </DetailContainer>
     );
