@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: flashdeal-postgres
+    environment:
+      POSTGRES_DB: flashdeal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - flashdeal-network
+
+  app:
+    build: .
+    container_name: flashdeal-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/flashdeal
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - flashdeal-network
+
+  frontend:
+    image: node:18-alpine
+    container_name: flashdeal-frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    environment:
+      - HOST=0.0.0.0
+      - WATCHPACK_POLLING=true
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm start"
+    networks:
+      - flashdeal-network
+
+volumes:
+  postgres_data:
+
+networks:
+  flashdeal-network:
+    driver: bridge
